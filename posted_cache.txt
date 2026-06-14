@@ -11,3 +11,4 @@ putit-mimore:10000263
 sanrio:10097979
 connectgate:10034127
 auc-mako:10012044
+auc-generalsticker:10014588
