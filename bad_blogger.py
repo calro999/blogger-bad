@@ -217,25 +217,40 @@ def post_to_blogger(title, content):
                 time.sleep(random.uniform(1.0, 2.0))
 
                 view_switch = page.locator('[aria-label="View mode"], [aria-label="表示モード"]').first
-                if view_switch.count() > 0:
+                if view_switch.is_visible():
                     view_switch.click()
                     time.sleep(random.uniform(0.5, 1.0))
-                    html_view_btn = page.locator('[aria-label="HTML view"], [aria-label="HTML ビュー"]').first
-                    if html_view_btn.count() > 0:
+                    html_view_btn = page.locator('[aria-label="HTML view"], [aria-label="HTML ビュー"], span:has-text("HTML")').first
+                    if html_view_btn.is_visible():
                         html_view_btn.click()
                         time.sleep(random.uniform(1.0, 2.0))
 
-                textarea = page.locator('textarea[aria-label="Body"], textarea[aria-label="本文"], .html-textarea').first
-                if textarea.count() > 0:
-                    textarea.click()
-                    textarea.fill(content)
-                else:
-                    editor = page.locator('.editable, [contenteditable="true"]').first
-                    editor.click()
+                try:
+                    editor_area = page.locator('.CodeMirror, textarea.html-textarea, iframe').last
+                    editor_area.click()
+                    time.sleep(1)
+                    
+                    page.keyboard.press('Meta+A')
+                    page.keyboard.press('Control+A')
+                    page.keyboard.press('Backspace')
+                    time.sleep(0.5)
+                    
+                    page.keyboard.insert_text(content)
+                except Exception as e:
+                    print("Fallback to JS injection due to error:", e)
                     page.evaluate('''(content) => {
-                        document.querySelector('[contenteditable="true"]').innerHTML = content;
+                        const ta = document.querySelector('textarea.html-textarea') || document.querySelector('textarea');
+                        if (ta) { ta.value = content; ta.dispatchEvent(new Event('input')); return; }
+                        const ce = document.querySelector('[contenteditable="true"]');
+                        if (ce) { ce.innerHTML = content; return; }
+                        const frames = document.querySelectorAll('iframe');
+                        for (let f of frames) {
+                            try {
+                                const fce = f.contentDocument.querySelector('[contenteditable="true"]');
+                                if (fce) { fce.innerHTML = content; return; }
+                            } catch(err) {}
+                        }
                     }''', content)
-                    page.keyboard.press('Space')
 
                 time.sleep(random.uniform(2.0, 3.0))
 
