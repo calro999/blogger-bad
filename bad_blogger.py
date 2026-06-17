@@ -59,7 +59,6 @@ def fetch_rakuten_item():
 
 def generate_article_with_llm(item):
     title = item.get("itemName")
-        short_title = title[:40] + ("..." if len(title) > 40 else "")
     price = item.get("itemPrice")
     url = item.get("affiliateUrl") or item.get("itemUrl")
     
@@ -155,7 +154,7 @@ def generate_article_with_llm(item):
 
     raise RuntimeError("All LLM generation attempts failed.")
 
-def post_to_blogger(short_title, content):
+def post_to_blogger(title[:40] + ("..." if len(title) > 40 else ""), content):
     session_b64 = os.environ.get("BLOGGER_SESSION_B64")
     if not session_b64:
         raise ValueError("BLOGGER_SESSION_B64 is not set in environment variables.")
@@ -319,14 +318,13 @@ def main():
         item = fetch_rakuten_item()
         item_code = item.get("itemCode")
         title = item.get("itemName")
-        short_title = title[:40] + ("..." if len(title) > 40 else "")
         print(f"Selected Item: {title} ({item_code})")
 
         # 2. LLMで記事生成
         content = generate_article_with_llm(item)
 
         # 3. Bloggerに投稿
-        post_to_blogger(short_title, content)
+        post_to_blogger(title[:40] + ("..." if len(title) > 40 else ""), content)
 
         # 4. キャッシュに保存
         save_to_cache(item_code)
