@@ -195,10 +195,18 @@ def post_to_blogger(title, content):
                 page.goto(f"https://draft.blogger.com/blog/post/edit/{blog_id}/new", wait_until="networkidle")
                 time.sleep(random.uniform(3.0, 5.0))
                 
-                # もし画面が遷移していなかったら、念のため「新しい投稿」ボタンをクリックする
+                # もし画面が遷移していなかったら、キーボードショートカット 'c' (新規投稿) を試す
                 if "edit" not in page.url:
-                    new_post_btn = page.locator('a[aria-label="新しい投稿"], a[aria-label="New post"], div[aria-label="新しい投稿"], div[aria-label="New post"], span:has-text("新しい投稿"), span:has-text("New Post")').first
-                    new_post_btn.click(force=True)
+                    page.keyboard.press('c')
+                    time.sleep(random.uniform(3.0, 5.0))
+                
+                # それでもダメならJSで強制的に「新しい投稿」ボタンをクリックする
+                if "edit" not in page.url:
+                    page.evaluate('''() => {
+                        const btns = Array.from(document.querySelectorAll('div[role="button"]'));
+                        const newPostBtn = btns.find(b => (b.getAttribute('aria-label') || '').includes('新しい投稿') || (b.getAttribute('aria-label') || '').includes('New post'));
+                        if (newPostBtn) newPostBtn.click();
+                    }''')
                     time.sleep(random.uniform(3.0, 5.0))
 
                 title_input = page.locator('.titleField input, input[aria-label*="Title"], input[aria-label*="タイトル"], input.whsOnd.zHQkBf').first
