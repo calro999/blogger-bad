@@ -183,20 +183,23 @@ def post_to_blogger(title, content):
             )
             context = browser.new_context(
                 storage_state=session_file_path,
-                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                viewport={"width": 1280, "height": 800}
             )
             page = context.new_page()
             page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
             try:
-                page.goto(f"https://www.blogger.com/blog/posts/{blog_id}", wait_until="networkidle")
                 time.sleep(random.uniform(3.0, 5.0))
 
-                # 新しい投稿ボタンをクリックして作成画面へ遷移（直接URL指定だと弾かれる対策）
-                new_post_btn = page.locator('a[aria-label="新しい投稿"], a[aria-label="New post"], div[aria-label="新しい投稿"], div[aria-label="New post"], span:has-text("新しい投稿"), span:has-text("New Post")').first
-                new_post_btn.wait_for(state="visible", timeout=15000)
-                new_post_btn.click()
+                page.goto(f"https://draft.blogger.com/blog/post/edit/{blog_id}/new", wait_until="networkidle")
                 time.sleep(random.uniform(3.0, 5.0))
+                
+                # もし画面が遷移していなかったら、念のため「新しい投稿」ボタンをクリックする
+                if "edit" not in page.url:
+                    new_post_btn = page.locator('a[aria-label="新しい投稿"], a[aria-label="New post"], div[aria-label="新しい投稿"], div[aria-label="New post"], span:has-text("新しい投稿"), span:has-text("New Post")').first
+                    new_post_btn.click(force=True)
+                    time.sleep(random.uniform(3.0, 5.0))
 
                 title_input = page.locator('.titleField input, input[aria-label*="Title"], input[aria-label*="タイトル"], input.whsOnd.zHQkBf').first
                 title_input.wait_for(state="visible", timeout=30000)
