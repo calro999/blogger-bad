@@ -59,6 +59,7 @@ def fetch_rakuten_item():
 
 def generate_article_with_llm(item):
     title = item.get("itemName")
+        short_title = title[:40] + ("..." if len(title) > 40 else "")
     price = item.get("itemPrice")
     url = item.get("affiliateUrl") or item.get("itemUrl")
     
@@ -154,7 +155,7 @@ def generate_article_with_llm(item):
 
     raise RuntimeError("All LLM generation attempts failed.")
 
-def post_to_blogger(title, content):
+def post_to_blogger(short_title, content):
     session_b64 = os.environ.get("BLOGGER_SESSION_B64")
     if not session_b64:
         raise ValueError("BLOGGER_SESSION_B64 is not set in environment variables.")
@@ -239,16 +240,29 @@ def post_to_blogger(title, content):
                 except Exception as e:
                     print("Fallback to JS injection due to error:", e)
                     page.evaluate('''(content) => {
-                        const ta = document.querySelector('textarea.html-textarea') || document.querySelector('textarea');
-                        if (ta) { ta.value = content; ta.dispatchEvent(new Event('input')); return; }
-                        const ce = document.querySelector('[contenteditable="true"]');
-                        if (ce) { ce.innerHTML = content; return; }
                         const frames = document.querySelectorAll('iframe');
                         for (let f of frames) {
                             try {
                                 const fce = f.contentDocument.querySelector('[contenteditable="true"]');
-                                if (fce) { fce.innerHTML = content; return; }
+                                if (fce) { 
+                                    fce.focus();
+                                    f.contentDocument.execCommand('insertHTML', false, content);
+                                    return; 
+                                }
                             } catch(err) {}
+                        }
+                        const ce = document.querySelector('[contenteditable="true"]');
+                        if (ce) { 
+                            ce.focus();
+                            document.execCommand('insertHTML', false, content);
+                            return; 
+                        }
+                        const ta = document.querySelector('textarea.html-textarea') || document.querySelector('textarea');
+                        if (ta) { 
+                            ta.value = content; 
+                            ta.dispatchEvent(new Event('input', { bubbles: true })); 
+                            ta.dispatchEvent(new Event('change', { bubbles: true }));
+                            return; 
                         }
                     }''', content)
 
@@ -257,9 +271,13 @@ def post_to_blogger(title, content):
                 # 公開ボタンをクリック（表示されている要素のみを対象にする）
                 try:
                     page.evaluate('''() => {
-                        const btns = Array.from(document.querySelectorAll('div[role="button"]'));
-                        const visibleBtns = btns.filter(b => b.offsetParent !== null);
-                        const pubBtn = visibleBtns.find(b => (b.getAttribute('aria-label') || '').includes('公開') || (b.getAttribute('aria-label') || '').includes('Publish'));
+                        const allEls = Array.from(document.querySelectorAll('div[role="button"], span[role="button"], button, div'));
+                        const visibleEls = allEls.filter(b => b.offsetParent !== null);
+                        const pubBtn = visibleEls.find(b => {
+                            const label = b.getAttribute('aria-label') || '';
+                            const text = b.innerText || '';
+                            return label.includes('公開') || label.includes('Publish') || text.trim() === '公開' || text.trim() === 'Publish';
+                        });
                         if (pubBtn) pubBtn.click();
                     }''')
                 except Exception as e:
@@ -270,9 +288,13 @@ def post_to_blogger(title, content):
                 # 確認ボタンをクリック（表示されている要素のみを対象にする）
                 try:
                     page.evaluate('''() => {
-                        const btns = Array.from(document.querySelectorAll('div[role="button"]'));
-                        const visibleBtns = btns.filter(b => b.offsetParent !== null);
-                        const confBtn = visibleBtns.find(b => (b.getAttribute('aria-label') || '').includes('確認') || (b.getAttribute('aria-label') || '').includes('Confirm'));
+                        const allEls = Array.from(document.querySelectorAll('div[role="button"], span[role="button"], button, div'));
+                        const visibleEls = allEls.filter(b => b.offsetParent !== null);
+                        const confBtn = visibleEls.find(b => {
+                            const label = b.getAttribute('aria-label') || '';
+                            const text = b.innerText || '';
+                            return label.includes('確認') || label.includes('Confirm') || text.trim() === '確認' || text.trim() === 'Confirm';
+                        });
                         if (confBtn) confBtn.click();
                     }''')
                 except Exception as e:
@@ -297,13 +319,14 @@ def main():
         item = fetch_rakuten_item()
         item_code = item.get("itemCode")
         title = item.get("itemName")
+        short_title = title[:40] + ("..." if len(title) > 40 else "")
         print(f"Selected Item: {title} ({item_code})")
 
         # 2. LLMで記事生成
         content = generate_article_with_llm(item)
 
         # 3. Bloggerに投稿
-        post_to_blogger(title, content)
+        post_to_blogger(short_title, content)
 
         # 4. キャッシュに保存
         save_to_cache(item_code)
