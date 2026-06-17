@@ -188,53 +188,59 @@ def post_to_blogger(title, content):
             page = context.new_page()
             page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
-            page.goto(f"https://www.blogger.com/blog/posts/{blog_id}", wait_until="networkidle")
-            time.sleep(random.uniform(2.0, 4.0))
-
-            page.goto(f"https://www.blogger.com/blog/post/edit/{blog_id}/new", wait_until="networkidle")
-            time.sleep(random.uniform(2.0, 4.0))
-
-            title_input = page.locator('input[aria-label="Title"], input[aria-label="タイトル"]').first
-            title_input.wait_for(state="visible", timeout=10000)
-            title_input.click()
-            time.sleep(random.uniform(0.5, 1.5))
-            title_input.fill(title)
-            time.sleep(random.uniform(1.0, 2.0))
-
-            view_switch = page.locator('[aria-label="View mode"], [aria-label="表示モード"]').first
-            if view_switch.count() > 0:
-                view_switch.click()
-                time.sleep(random.uniform(0.5, 1.0))
-                html_view_btn = page.locator('[aria-label="HTML view"], [aria-label="HTML ビュー"]').first
-                if html_view_btn.count() > 0:
-                    html_view_btn.click()
-                    time.sleep(random.uniform(1.0, 2.0))
-
-            textarea = page.locator('textarea[aria-label="Body"], textarea[aria-label="本文"], .html-textarea').first
-            if textarea.count() > 0:
-                textarea.click()
-                textarea.fill(content)
-            else:
-                editor = page.locator('.editable, [contenteditable="true"]').first
-                editor.click()
-                page.evaluate('''(content) => {
-                    document.querySelector('[contenteditable="true"]').innerHTML = content;
-                }''', content)
-                page.keyboard.press('Space')
-
-            time.sleep(random.uniform(2.0, 3.0))
-
-            publish_btn = page.locator('[aria-label="Publish"], [aria-label="公開"]').first
-            publish_btn.wait_for(state="visible", timeout=10000)
-            publish_btn.click()
-            time.sleep(random.uniform(1.0, 2.0))
-
-            confirm_btn = page.locator('[aria-label="Confirm"], [aria-label="確認"]').first
-            if confirm_btn.count() > 0:
-                confirm_btn.click()
+            try:
+                page.goto(f"https://www.blogger.com/blog/posts/{blog_id}", wait_until="networkidle")
                 time.sleep(random.uniform(2.0, 4.0))
 
-            print("Successfully posted using Playwright!")
+                page.goto(f"https://www.blogger.com/blog/post/edit/{blog_id}/new", wait_until="networkidle")
+                time.sleep(random.uniform(2.0, 4.0))
+
+                title_input = page.locator('.titleField input, input[aria-label*="Title"], input[aria-label*="タイトル"], input.whsOnd.zHQkBf').first
+                title_input.wait_for(state="visible", timeout=30000)
+                title_input.click()
+                time.sleep(random.uniform(0.5, 1.5))
+                title_input.fill(title)
+                time.sleep(random.uniform(1.0, 2.0))
+
+                view_switch = page.locator('[aria-label="View mode"], [aria-label="表示モード"]').first
+                if view_switch.count() > 0:
+                    view_switch.click()
+                    time.sleep(random.uniform(0.5, 1.0))
+                    html_view_btn = page.locator('[aria-label="HTML view"], [aria-label="HTML ビュー"]').first
+                    if html_view_btn.count() > 0:
+                        html_view_btn.click()
+                        time.sleep(random.uniform(1.0, 2.0))
+
+                textarea = page.locator('textarea[aria-label="Body"], textarea[aria-label="本文"], .html-textarea').first
+                if textarea.count() > 0:
+                    textarea.click()
+                    textarea.fill(content)
+                else:
+                    editor = page.locator('.editable, [contenteditable="true"]').first
+                    editor.click()
+                    page.evaluate('''(content) => {
+                        document.querySelector('[contenteditable="true"]').innerHTML = content;
+                    }''', content)
+                    page.keyboard.press('Space')
+
+                time.sleep(random.uniform(2.0, 3.0))
+
+                publish_btn = page.locator('[aria-label="Publish"], [aria-label="公開"], div[role="button"]:has-text("公開"), div[role="button"]:has-text("Publish")').first
+                publish_btn.wait_for(state="visible", timeout=10000)
+                publish_btn.click()
+                time.sleep(random.uniform(1.0, 2.0))
+
+                confirm_btn = page.locator('[aria-label="Confirm"], [aria-label="確認"], div[role="button"]:has-text("確認"), div[role="button"]:has-text("Confirm")').first
+                if confirm_btn.count() > 0:
+                    confirm_btn.click()
+                    time.sleep(random.uniform(2.0, 4.0))
+
+                print("Successfully posted using Playwright!")
+            except Exception as e:
+                print(f"Error occurred. Current URL: {page.url}")
+                print(f"Page Title: {page.title()}")
+                print(f"Page Content Snippet: {page.content()[:1000]}")
+                raise e
 
     finally:
         if os.path.exists(session_file_path):
