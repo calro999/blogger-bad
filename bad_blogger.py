@@ -254,15 +254,31 @@ def post_to_blogger(title, content):
 
                 time.sleep(random.uniform(2.0, 3.0))
 
-                publish_btn = page.locator('[aria-label="Publish"], [aria-label="公開"], div[role="button"]:has-text("公開"), div[role="button"]:has-text("Publish")').first
-                publish_btn.wait_for(state="visible", timeout=10000)
-                publish_btn.click()
-                time.sleep(random.uniform(1.0, 2.0))
+                # 公開ボタンをクリック（表示されている要素のみを対象にする）
+                try:
+                    page.evaluate('''() => {
+                        const btns = Array.from(document.querySelectorAll('div[role="button"]'));
+                        const visibleBtns = btns.filter(b => b.offsetParent !== null);
+                        const pubBtn = visibleBtns.find(b => (b.getAttribute('aria-label') || '').includes('公開') || (b.getAttribute('aria-label') || '').includes('Publish'));
+                        if (pubBtn) pubBtn.click();
+                    }''')
+                except Exception as e:
+                    print("Publish click error:", e)
+                
+                time.sleep(random.uniform(2.0, 3.0))
 
-                confirm_btn = page.locator('[aria-label="Confirm"], [aria-label="確認"], div[role="button"]:has-text("確認"), div[role="button"]:has-text("Confirm")').first
-                if confirm_btn.count() > 0:
-                    confirm_btn.click()
-                    time.sleep(random.uniform(2.0, 4.0))
+                # 確認ボタンをクリック（表示されている要素のみを対象にする）
+                try:
+                    page.evaluate('''() => {
+                        const btns = Array.from(document.querySelectorAll('div[role="button"]'));
+                        const visibleBtns = btns.filter(b => b.offsetParent !== null);
+                        const confBtn = visibleBtns.find(b => (b.getAttribute('aria-label') || '').includes('確認') || (b.getAttribute('aria-label') || '').includes('Confirm'));
+                        if (confBtn) confBtn.click();
+                    }''')
+                except Exception as e:
+                    print("Confirm click error:", e)
+                
+                time.sleep(random.uniform(3.0, 5.0))
 
                 print("Successfully posted using Playwright!")
             except Exception as e:
