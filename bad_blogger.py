@@ -2,8 +2,10 @@ import os
 import random
 import requests
 import time
-from google.oauth2.credentials import Credentials
-from googleapiclient.discovery import build
+import base64
+import tempfile
+from playwright.sync_api import sync_playwright
+from playwright_stealth import stealth_sync
 
 CACHE_FILE = "posted_cache.txt"
 
@@ -153,24 +155,84 @@ def generate_article_with_llm(item):
     raise RuntimeError("All LLM generation attempts failed.")
 
 def post_to_blogger(title, content):
-    creds = Credentials(
-        token=None,
-        refresh_token=os.environ["BLOGGER_REFRESH_TOKEN"],
-        client_id=os.environ["BLOGGER_CLIENT_ID"],
-        client_secret=os.environ["BLOGGER_CLIENT_SECRET"],
-        token_uri="https://oauth2.googleapis.com/token",
-    )
-    service = build("blogger", "v3", credentials=creds)
+    session_b64 = os.environ.get("BLOGGER_SESSION_B64")
+    if not session_b64:
+        raise ValueError("BLOGGER_SESSION_B64 is not set in environment variables.")
     
-    blog_id = os.environ["BLOGGER_BLOG_ID"]
-    body = {
-        "title": title,
-        "content": content
-    }
-    
-    print(f"Posting to Blogger (Blog ID: {blog_id})...")
-    post = service.posts().insert(blogId=blog_id, body=body).execute()
-    print(f"Successfully posted! Post URL: {post.get('url')}")
+    blog_id = os.environ.get("BLOGGER_BLOG_ID")
+    if not blog_id:
+        raise ValueError("BLOGGER_BLOG_ID is not set in environment variables.")
+
+    with tempfile.NamedTemporaryFile(mode="wb", delete=False, suffix=".json") as temp_file:
+        temp_file.write(base64.b64decode(session_b64))
+        session_file_path = temp_file.name
+
+    print(f"Posting to Blogger (Blog ID: {blog_id}) using Playwright...")
+
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(
+                headless=True,
+                args=["--disable-blink-features=AutomationControlled"]
+            )
+            context = browser.new_context(
+                storage_state=session_file_path,
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            )
+            page = context.new_page()
+            stealth_sync(page)
+
+            page.goto(f"https://www.blogger.com/blog/posts/{blog_id}", wait_until="networkidle")
+            time.sleep(random.uniform(2.0, 4.0))
+
+            page.goto(f"https://www.blogger.com/blog/post/edit/{blog_id}/new", wait_until="networkidle")
+            time.sleep(random.uniform(2.0, 4.0))
+
+            title_input = page.locator('input[aria-label="Title"], input[aria-label="タイトル"]').first
+            title_input.wait_for(state="visible", timeout=10000)
+            title_input.click()
+            time.sleep(random.uniform(0.5, 1.5))
+            title_input.fill(title)
+            time.sleep(random.uniform(1.0, 2.0))
+
+            view_switch = page.locator('[aria-label="View mode"], [aria-label="表示モード"]').first
+            if view_switch.count() > 0:
+                view_switch.click()
+                time.sleep(random.uniform(0.5, 1.0))
+                html_view_btn = page.locator('[aria-label="HTML view"], [aria-label="HTML ビュー"]').first
+                if html_view_btn.count() > 0:
+                    html_view_btn.click()
+                    time.sleep(random.uniform(1.0, 2.0))
+
+            textarea = page.locator('textarea[aria-label="Body"], textarea[aria-label="本文"], .html-textarea').first
+            if textarea.count() > 0:
+                textarea.click()
+                textarea.fill(content)
+            else:
+                editor = page.locator('.editable, [contenteditable="true"]').first
+                editor.click()
+                page.evaluate('''(content) => {
+                    document.querySelector('[contenteditable="true"]').innerHTML = content;
+                }''', content)
+                page.keyboard.press('Space')
+
+            time.sleep(random.uniform(2.0, 3.0))
+
+            publish_btn = page.locator('[aria-label="Publish"], [aria-label="公開"]').first
+            publish_btn.wait_for(state="visible", timeout=10000)
+            publish_btn.click()
+            time.sleep(random.uniform(1.0, 2.0))
+
+            confirm_btn = page.locator('[aria-label="Confirm"], [aria-label="確認"]').first
+            if confirm_btn.count() > 0:
+                confirm_btn.click()
+                time.sleep(random.uniform(2.0, 4.0))
+
+            print("Successfully posted using Playwright!")
+
+    finally:
+        if os.path.exists(session_file_path):
+            os.remove(session_file_path)
 
 def main():
     try:
