@@ -190,10 +190,13 @@ def post_to_blogger(title, content):
 
             try:
                 page.goto(f"https://www.blogger.com/blog/posts/{blog_id}", wait_until="networkidle")
-                time.sleep(random.uniform(2.0, 4.0))
+                time.sleep(random.uniform(3.0, 5.0))
 
-                page.goto(f"https://www.blogger.com/blog/post/edit/{blog_id}/new", wait_until="networkidle")
-                time.sleep(random.uniform(2.0, 4.0))
+                # 新しい投稿ボタンをクリックして作成画面へ遷移（直接URL指定だと弾かれる対策）
+                new_post_btn = page.locator('a[aria-label="新しい投稿"], a[aria-label="New post"], div[aria-label="新しい投稿"], div[aria-label="New post"], span:has-text("新しい投稿"), span:has-text("New Post")').first
+                new_post_btn.wait_for(state="visible", timeout=15000)
+                new_post_btn.click()
+                time.sleep(random.uniform(3.0, 5.0))
 
                 title_input = page.locator('.titleField input, input[aria-label*="Title"], input[aria-label*="タイトル"], input.whsOnd.zHQkBf').first
                 title_input.wait_for(state="visible", timeout=30000)
