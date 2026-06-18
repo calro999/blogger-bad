@@ -89,21 +89,23 @@ def generate_article_with_llm(item):
         if small_images:
             image_url = small_images[0]
 
-    prompt = f"""以下の楽天の商品情報を基にして、自動投稿用のHTML記事を生成してください。
+    prompt = f"""以下の楽天の商品情報を基にして、ブログ記事のタイトルとHTML本文を生成してください。
 【商品名】: {title}
 【価格】: {price}円
 【商品画像URL】: {image_url}
 【アフィリエイトURL】: {url}
 
 以下の要件を厳格に遵守してください：
-1. 出力はブログの本文となるHTMLコードのみとし、余計な説明、挨拶、前置きや後書き（例：「以下が記事です」「```html」のようなマークダウンブロック）は絶対に含めず、純粋なHTML文字列のみを出力してください。
-2. アイキャッチ画像として、商品画像URL（{image_url}）を直接<img>タグのsrc属性に指定し、記事の最上部に配置してください。
-3. 記事構成：
-   - キャッチーな見出し（<h2> または <h3> タグを使用）
-   - 商品の簡潔な説明（客観的で魅力が伝わる文章。自分語りやポエム調の表現は一切禁止）
-   - コレクター向けの魅力3ポイント（必ず <ul> と <li> タグを使用）
-   - 購買意欲を促す太字の誘導文（<strong> または <b> タグを使用）
-   - 最後にアフィリエイトリンクのボタン（<a>タグでスタイルし、新しいタブで開く target="_blank" rel="noopener noreferrer" を指定。ボタンらしいデザインになるようインラインスタイルを施すこと。例：background-color: #ff6600; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;）
+1. 出力は以下のJSONフォーマットのみとしてください。他のテキストは一切含めないでください。
+{{
+    "title": "ここにキャッチーで魅力的なタイトル（商品名の単なる羅列は禁止、最大35文字）",
+    "html": "ここに純粋なHTML本文（以下の構成に従う）"
+}}
+2. HTML本文の構成：
+   - 記事全体を `<div class="premium-squishy-article">` と `</div>` で囲む
+   - 商品の魅力的な説明（`<div class="premium-content-body">` と `</div>` で囲む）
+   - 極上の贅沢ポイント3選（`<ul class="premium-points-list">` と `<li>` タグを使用）
+   - アフィリエイトリンク（`<a class="premium-affiliate-btn" href="{url}" target="_blank" rel="noopener noreferrer">プレミアム詳細を見る ＞</a>`）
 """
 
     # 1. GitHub Models API (GITHUB_TOKENを使用) を最優先
@@ -125,7 +127,18 @@ def generate_article_with_llm(item):
             }
             response = requests.post("https://models.inference.ai.azure.com/chat/completions", headers=headers, json=payload, timeout=30)
             if response.status_code == 200:
-                result = response.json()["choices"][0]["message"]["content"].strip()
+                result_text = response.json()["choices"][0]["message"]["content"].strip()
+                import json
+                try:
+                    # Markdownブロック等を取り除く
+                    if "```json" in result_text: result_text = result_text.split("```json", 1)[1]
+                    if "```" in result_text: result_text = result_text.split("```")[0]
+                    result_text = result_text.strip()
+                    parsed = json.loads(result_text)
+                    return parsed # 辞書を返す
+                except Exception as e:
+                    print("JSON Parse error:", e)
+                    return {"title": "【注目】" + title[:30] + "...", "html": result_text}
                 if "```html" in result:
                     result = result.split("```html", 1)[1]
                 if "```" in result:
@@ -155,7 +168,16 @@ def generate_article_with_llm(item):
                 timeout=45
             )
             if response.status_code == 200 and len(response.text.strip()) > 100:
-                result = response.text.strip()
+                result_text = response.text.strip()
+                    import json
+                    try:
+                        if "```json" in result_text: result_text = result_text.split("```json", 1)[1]
+                        if "```" in result_text: result_text = result_text.split("```")[0]
+                        result_text = result_text.strip()
+                        parsed = json.loads(result_text)
+                        return parsed
+                    except:
+                        return {"title": "【注目】" + title[:30] + "...", "html": result_text}
                 if "```html" in result:
                     result = result.split("```html", 1)[1]
                 if "```" in result:
@@ -170,7 +192,7 @@ def generate_article_with_llm(item):
 
     raise RuntimeError("All LLM generation attempts failed.")
 
-def post_to_blogger(title, content):
+def post_to_blogger(gen_title, content):
     session_b64 = os.environ.get("BLOGGER_SESSION_B64")
     if not session_b64:
         raise ValueError("BLOGGER_SESSION_B64 is not set in environment variables.")
@@ -199,7 +221,10 @@ def post_to_blogger(title, content):
             )
             context = browser.new_context(
                 storage_state=session_file_path,
+                viewport={"width": 1280, "height": 800},
                 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                permissions=['clipboard-read', 'clipboard-write']
+            ) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
                 viewport={"width": 1280, "height": 800}
             )
             page = context.new_page()
@@ -225,62 +250,76 @@ def post_to_blogger(title, content):
                     }''')
                     time.sleep(random.uniform(3.0, 5.0))
 
-                title_input = page.locator('.titleField input, input[aria-label*="Title"], input[aria-label*="タイトル"], input.whsOnd.zHQkBf').first
+                # 1. タイトル入力
+                title_input = page.locator('.titleField input, input[aria-label*="Title"], input[aria-label*="タイトル"]').first
                 title_input.wait_for(state="visible", timeout=30000)
                 title_input.click()
-                time.sleep(random.uniform(0.5, 1.5))
+                time.sleep(0.5)
+                # タイトルを全消去して入力
+                page.keyboard.press('Meta+A')
+                page.keyboard.press('Control+A')
+                page.keyboard.press('Backspace')
                 title_input.fill(title)
-                time.sleep(random.uniform(1.0, 2.0))
+                time.sleep(2)
 
-                # 1. iframe内部の正しいエディタ領域にフォーカスして本文を入力
+                # 2. 本文入力（システムクリップボードを利用した究極のCtrl+V作戦）
                 try:
+                    # クリップボードにHTMLを書き込む
+                    page.evaluate("navigator.clipboard.writeText(arguments[0])", content)
+                    time.sleep(1)
+                    
+                    # iframe内部のエディタにフォーカス
                     frame = page.frame_locator('.blogger-iframe, iframe').first
                     editor = frame.locator('[contenteditable="true"], body').first
                     editor.click(timeout=10000)
+                    editor.focus()
                     time.sleep(1)
                     
+                    # 全選択してクリア
                     page.keyboard.press('Meta+A')
                     page.keyboard.press('Control+A')
                     page.keyboard.press('Backspace')
-                    time.sleep(0.5)
+                    time.sleep(1)
                     
-                    page.keyboard.insert_text(content)
-                    print("Successfully entered content via frame_locator.")
+                    # システムのペーストコマンドを発行
+                    # MacとWin両方のショートカットを送信
+                    page.keyboard.press('Control+V')
+                    time.sleep(0.5)
+                    page.keyboard.press('Meta+V')
+                    time.sleep(2)
+                    print("Successfully pasted content via OS clipboard shortcut.")
                 except Exception as e:
-                    print("Failed to input content via frame_locator:", e)
+                    print("Failed to paste content:", e)
                 
                 time.sleep(3)
 
-                # 2. 公開ボタンのクリック
+                # 3. 公開ボタンのクリック
                 try:
-                    pub_btn = page.locator('[aria-label="公開"], [aria-label="Publish"], span:has-text("公開")').locator("visible=true").first
-                    pub_btn.click(timeout=10000)
+                    pub_btn = page.locator('[aria-label="公開"], [aria-label="Publish"]').filter(state="visible").first
+                    pub_btn.scroll_into_view_if_needed()
+                    time.sleep(1)
+                    pub_btn.click(force=True, timeout=10000)
                     print("Clicked publish button.")
                 except Exception as e:
                     print("Failed to click publish button:", e)
-                    # フォールバック：JSクリック
-                    page.evaluate('''() => {
-                        const btns = Array.from(document.querySelectorAll('span, div[role="button"]'));
-                        const pBtn = btns.find(b => (b.innerText||'').trim() === '公開' || (b.innerText||'').trim() === 'Publish');
-                        if (pBtn) pBtn.click();
-                    }''')
+                    # ショートカットフォールバック
+                    page.keyboard.press('Control+Shift+P')
+                    page.keyboard.press('Meta+Shift+P')
                 
-                time.sleep(3)
+                time.sleep(4)
 
-                # 3. 確認ダイアログの「確認」ボタンをクリック
+                # 4. 確認ダイアログの「確認」ボタン
                 try:
-                    conf_btn = page.locator('[aria-label="確認"], [aria-label="Confirm"], span:has-text("確認")').locator("visible=true").first
-                    conf_btn.click(timeout=10000)
+                    conf_btn = page.locator('[aria-label="確認"], [aria-label="Confirm"], div[role="button"]:has-text("確認")').filter(state="visible").first
+                    conf_btn.scroll_into_view_if_needed()
+                    time.sleep(1)
+                    conf_btn.click(force=True, timeout=10000)
                     print("Clicked confirm button.")
                 except Exception as e:
                     print("Failed to click confirm button:", e)
-                    # フォールバック：JSクリック
-                    page.evaluate('''() => {
-                        const btns = Array.from(document.querySelectorAll('span, div[role="button"]'));
-                        const cBtn = btns.find(b => (b.innerText||'').trim() === '確認' || (b.innerText||'').trim() === 'Confirm');
-                        if (cBtn) cBtn.click();
-                    }''')
+                    page.keyboard.press('Enter')
                 
+                # 公開通信完了まで十分待機
                 time.sleep(15)
 
                 print("Successfully posted using Playwright!")
@@ -303,10 +342,12 @@ def main():
         print(f"Selected Item: {title} ({item_code})")
 
         # 2. LLMで記事生成
-        content = generate_article_with_llm(item)
+        llm_result = generate_article_with_llm(item)
+        gen_title = llm_result.get("title", title[:30])
+        content = llm_result.get("html", "")
 
         # 3. Bloggerに投稿
-        post_to_blogger(title[:40] + ("..." if len(title) > 40 else ""), content)
+        post_to_blogger(gen_title, content)
 
         # 4. キャッシュに保存
         save_to_cache(item_code)
