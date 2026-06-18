@@ -274,10 +274,8 @@ def post_to_blogger(title, content):
                     
                     mode_btn = toolbar.locator('div[role="button"]').first
                     mode_btn.click()
-                    import time
                     time.sleep(1)
                     
-                    import re
                     html_view_btn = page.locator('div[role="menuitem"]').filter(has_text=re.compile(r'HTML', re.IGNORECASE)).first
                     if html_view_btn.is_visible():
                         html_view_btn.click()
@@ -327,7 +325,7 @@ def post_to_blogger(title, content):
                     
                 time.sleep(5)
 
-                                # 3. 公開ボタンのクリック
+                                                # 3. 公開ボタンのクリック
                 try:
                     pub_btn = page.locator('[aria-label="公開"], [aria-label="Publish"]').locator("visible=true").first
                     pub_btn.scroll_into_view_if_needed()
