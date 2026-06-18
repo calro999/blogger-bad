@@ -9,6 +9,22 @@ from playwright.sync_api import sync_playwright
 
 CACHE_FILE = "posted_cache.txt"
 
+
+def click_physical(page, selector):
+    import time
+    elements = page.locator(selector).all()
+    for el in elements:
+        try:
+            box = el.bounding_box()
+            if box and box['width'] > 0 and box['height'] > 0:
+                x = box['x'] + box['width'] / 2
+                y = box['y'] + box['height'] / 2
+                page.mouse.click(x, y)
+                return True
+        except:
+            pass
+    return False
+
 def load_posted_cache():
     if os.path.exists(CACHE_FILE):
         with open(CACHE_FILE, "r", encoding="utf-8") as f:
@@ -216,86 +232,31 @@ def post_to_blogger(title, content):
                 title_input.fill(title)
                 time.sleep(random.uniform(1.0, 2.0))
 
-                # 確実なHTMLビューへの切り替え
-                page.evaluate('''() => {
-                    const btns = Array.from(document.querySelectorAll('span[role="button"], div[role="button"]'));
-                    const modeBtn = btns.find(b => {
-                        const label = b.getAttribute('aria-label') || '';
-                        return label === '表示モード' || label === 'View mode';
-                    });
-                    if (modeBtn) modeBtn.click();
-                }''')
-                time.sleep(2)
+                # 1. 物理クリックによる確実なHTMLビュー切り替え
+                click_physical(page, '[aria-label="表示モード"], [aria-label="View mode"]')
+                time.sleep(1.5)
                 
-                page.evaluate('''() => {
-                    const els = Array.from(document.querySelectorAll('span, div[role="menuitem"]'));
-                    const htmlBtn = els.find(b => {
-                        const text = b.innerText || '';
-                        return text.includes('HTML ビュー') || text.includes('HTML view');
-                    });
-                    if (htmlBtn) htmlBtn.click();
-                }''')
+                click_physical(page, '[role="menuitem"]:has-text("HTML"), span:has-text("HTML")')
+                time.sleep(1.5)
+
+                # 2. HTMLビューのテキストエリアに確実に入力
+                textareas = page.locator('textarea').all()
+                for ta in textareas:
+                    box = ta.bounding_box()
+                    if box and box['width'] > 0 and box['height'] > 0:
+                        ta.click()
+                        time.sleep(0.5)
+                        ta.fill(content)
+                        break
                 time.sleep(2)
 
-                # HTMLビューのtextareaに確実に入力
-                page.evaluate('''(content) => {
-                    const ta = Array.from(document.querySelectorAll('textarea')).pop();
-                    if (ta) {
-                        ta.value = content;
-                        ta.dispatchEvent(new Event('input', { bubbles: true }));
-                        ta.dispatchEvent(new Event('change', { bubbles: true }));
-                    } else {
-                        // textareaがない場合はiframeの中のcontenteditableを探す
-                        const frames = document.querySelectorAll('iframe');
-                        for (let f of frames) {
-                            try {
-                                const fce = f.contentDocument.querySelector('[contenteditable="true"]');
-                                if (fce) {
-                                    fce.focus();
-                                    f.contentDocument.execCommand('insertHTML', false, content);
-                                    return;
-                                }
-                            } catch(err) {}
-                        }
-                        const ce = document.querySelector('[contenteditable="true"]');
-                        if (ce) {
-                            ce.focus();
-                            document.execCommand('insertHTML', false, content);
-                        }
-                    }
-                }''', content)
-                time.sleep(3)
+                # 3. 物理クリックによる確実な公開
+                click_physical(page, '[aria-label="公開"], [aria-label="Publish"]')
+                time.sleep(2)
 
-                # 公開ボタンをクリック（マウスイベントを完全エミュレート）
-                page.evaluate('''() => {
-                    const btns = Array.from(document.querySelectorAll('div[role="button"]'));
-                    const pubBtn = btns.find(b => {
-                        const label = b.getAttribute('aria-label') || '';
-                        return label === '公開' || label === 'Publish';
-                    });
-                    if (pubBtn) {
-                        pubBtn.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
-                        pubBtn.dispatchEvent(new MouseEvent('mouseup', {bubbles: true}));
-                        pubBtn.click();
-                    }
-                }''')
-                time.sleep(3)
-
-                # 確認ダイアログの「確認」ボタンをクリック
-                page.evaluate('''() => {
-                    const btns = Array.from(document.querySelectorAll('div[role="button"], span[role="button"], button'));
-                    const confBtn = btns.find(b => {
-                        const text = b.innerText || '';
-                        const label = b.getAttribute('aria-label') || '';
-                        return text.trim() === '確認' || text.trim() === 'Confirm' || label === '確認' || label === 'Confirm';
-                    });
-                    if (confBtn) {
-                        confBtn.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
-                        confBtn.dispatchEvent(new MouseEvent('mouseup', {bubbles: true}));
-                        confBtn.click();
-                    }
-                }''')
-                time.sleep(5)
+                # 4. 物理クリックによる確実な確認ダイアログ
+                click_physical(page, '[aria-label="確認"], [aria-label="Confirm"]')
+                time.sleep(4)
 
                 print("Successfully posted using Playwright!")
             except Exception as e:
