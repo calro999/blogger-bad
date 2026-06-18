@@ -266,46 +266,34 @@ def post_to_blogger(title, content):
                 title_input.fill(title)
                 time.sleep(2)
 
-                # 2. 本文入力（ブラウザ内部JSによる直接的な execCommand と input イベント発火）
+                # 2. 本文入力（HTMLビュー切り替えショートカット＋textarea.fill）
                 try:
-                    # iframeが表示されるまで確実に待つ
-                    page.wait_for_selector('.blogger-iframe', state="visible", timeout=15000)
+                    # まずタイトル欄からTabで移動
+                    page.keyboard.press('Tab')
+                    time.sleep(1)
+                    
+                    # HTMLビュー/作成ビュー切り替えショートカット (Ctrl+Shift+\)
+                    page.keyboard.press('Control+Shift+\')
+                    page.keyboard.press('Meta+Shift+\')
                     time.sleep(2)
                     
-                    # ブラウザ内のJSでエディタに直接HTMLを叩き込む
-                    page.evaluate('''([html]) => {
-                        const iframe = document.querySelector('.blogger-iframe');
-                        if (!iframe) throw new Error("Iframe not found");
-                        const editor = iframe.contentDocument.body;
-                        if (!editor) throw new Error("Editor body not found");
+                    # 念のためもう一度（すでにHTMLビューだった場合戻ってしまう対策は、textareaの存在確認で行う）
+                    if not page.locator('textarea.html-textarea').is_visible():
+                        page.keyboard.press('Control+Shift+\')
+                        page.keyboard.press('Meta+Shift+\')
+                        time.sleep(2)
                         
-                        // エディタにフォーカスを強制
-                        editor.focus();
-                        
-                        // 全選択＆削除
-                        iframe.contentDocument.execCommand('selectAll', false, null);
-                        iframe.contentDocument.execCommand('delete', false, null);
-                        
-                        // HTMLを挿入
-                        const success = iframe.contentDocument.execCommand('insertHTML', false, html);
-                        if (!success) throw new Error("insertHTML failed");
-                        
-                        // React/Wizに状態変更を強制認識させるためのイベント連打
-                        editor.dispatchEvent(new Event('input', { bubbles: true }));
-                        editor.dispatchEvent(new Event('change', { bubbles: true }));
-                        
-                        // 万が一のためにinnerHTMLも直接書き換える
-                        if (editor.innerHTML.length < 10) {
-                            editor.innerHTML = html;
-                            editor.dispatchEvent(new Event('input', { bubbles: true }));
-                        }
-                    }''', [content])
-                    
-                    print("Successfully injected HTML via JS.")
+                    # HTMLビューのテキストエリアに直接流し込む
+                    html_textarea = page.locator('textarea.html-textarea, textarea').locator("visible=true").first
+                    if html_textarea.is_visible():
+                        html_textarea.fill(content)
+                        print("Successfully filled HTML via textarea.")
+                    else:
+                        print("HTML textarea not visible, falling back to basic insertText...")
+                        page.keyboard.insert_text(content)
                 except Exception as e:
                     print("Failed to inject HTML:", e)
                     
-                # 保存処理が走るのを待機
                 time.sleep(5)
 
                 # 3. 公開ボタンのクリック
@@ -358,8 +346,25 @@ def main():
 
         # 2. LLMで記事生成
         llm_result = generate_article_with_llm(item)
-        gen_title = llm_result.get("title", title[:30])
-        content = llm_result.get("html", "")
+        if isinstance(llm_result, dict):
+            gen_title = llm_result.get("title", title[:30])
+            html_content = llm_result.get("html", "")
+        else:
+            gen_title = title[:30]
+            html_content = str(llm_result)
+            
+        if not html_content or len(html_content) < 10:
+            # AIが失敗した時の絶対的なフォールバックHTML
+            image_url = item.get("mediumImageUrls", [{"imageUrl": ""}])[0].get("imageUrl", "") if item.get("mediumImageUrls") else ""
+            html_content = f'<h2>{gen_title}</h2><br><br><img src="{image_url}" alt="商品画像" style="max-width: 100%; height: auto;"><br><br><a href="{url}" target="_blank">商品詳細を見る ＞</a><br><br><a href="https://room.rakuten.co.jp/jack555/items" target="_blank">✅ 私の楽天ROOMはこちら</a>'
+            
+        print("--- Generated HTML Content Snippet ---")
+        print(html_content[:200])
+        print("--------------------------------------")
+        
+        post_to_blogger(gen_title, html_content)
+        # 既存の content という変数名を使っている場所の対策
+        content = html_content
 
         # 3. Bloggerに投稿
         post_to_blogger(gen_title, content)
