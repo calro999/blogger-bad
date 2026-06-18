@@ -339,24 +339,36 @@ def post_to_blogger(title, content):
                 if not success:
                     raise Exception("Critical Failure: Could not inject body content after 3 attempts. Aborting save to prevent empty drafts.")
 
-                # 3. 下書き保存処理（公開ボタンを押さない）
-                print("Saving as draft...")
+                # 3. 公開ボタンのクリック
+                print("Publishing post...")
                 try:
-                    # Bloggerの「保存」ボタン（雲にチェックアイコンなど）
-                    save_btn = page.locator('[aria-label="保存"], [aria-label="Save"]').first
-                    if save_btn.is_visible():
-                        save_btn.click(force=True)
-                        print("Clicked save button.")
-                    else:
-                        page.keyboard.press('Control+s')
-                        page.keyboard.press('Meta+s')
-                        print("Pressed Ctrl+S to save.")
-                    time.sleep(5)
+                    pub_btn = page.locator('[aria-label="公開"], [aria-label="Publish"]').locator("visible=true").first
+                    pub_btn.scroll_into_view_if_needed()
+                    time.sleep(1)
+                    pub_btn.click(force=True, timeout=10000)
+                    print("Clicked publish button.")
                 except Exception as e:
-                    print("Failed to click save button:", e)
+                    print("Failed to click publish button:", e)
+                    # ショートカットフォールバック
+                    page.keyboard.press('Control+Shift+P')
+                    page.keyboard.press('Meta+Shift+P')
+                
+                time.sleep(4)
 
-                time.sleep(3)
-                print("Successfully saved draft using Playwright!")
+                # 4. 確認ダイアログの「確認」ボタン
+                try:
+                    conf_btn = page.locator('[aria-label="確認"], [aria-label="Confirm"], div[role="button"]:has-text("確認")').locator("visible=true").first
+                    conf_btn.scroll_into_view_if_needed()
+                    time.sleep(1)
+                    conf_btn.click(force=True, timeout=10000)
+                    print("Clicked confirm button.")
+                except Exception as e:
+                    print("Failed to click confirm button:", e)
+                    page.keyboard.press('Enter')
+                
+                # 公開通信完了まで十分待機
+                time.sleep(10)
+                print("Successfully published post using Playwright!")
             except Exception as e:
                 print(f"Error occurred. Current URL: {page.url}")
                 print(f"Page Title: {page.title()}")
