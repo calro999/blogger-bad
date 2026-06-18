@@ -287,7 +287,21 @@ def post_to_blogger(title, content):
                     html_textarea = page.locator('textarea.html-textarea, textarea').locator("visible=true").first
                     if html_textarea.is_visible():
                         html_textarea.fill(content)
+                        time.sleep(1)
+                        # 強制的にイベントを発火させて変更を認識させる
+                        html_textarea.press('Enter')
+                        html_textarea.evaluate("node => node.dispatchEvent(new Event('input', { bubbles: true }))")
+                        html_textarea.evaluate("node => node.dispatchEvent(new Event('change', { bubbles: true }))")
+                        html_textarea.evaluate("node => node.blur()")
                         print("Successfully filled HTML via textarea.")
+                        
+                        time.sleep(2)
+                        
+                        # 作成ビューに戻す（これでBloggerはHTMLをパースして内部保存する）
+                        print("Switching back to compose view to commit HTML...")
+                        page.keyboard.press('Control+Shift+Backslash')
+                        page.keyboard.press('Meta+Shift+Backslash')
+                        time.sleep(5)  # Bloggerのオートセーブ/パース完了をしっかり待つ
                     else:
                         print("HTML textarea not visible, falling back to basic insertText...")
                         page.keyboard.insert_text(content)
