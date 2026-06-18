@@ -232,68 +232,56 @@ def post_to_blogger(title, content):
                 title_input.fill(title)
                 time.sleep(random.uniform(1.0, 2.0))
 
-                # 1. 本文エリアにフォーカスし、ペーストイベントを偽装してHTMLを入力する
-                page.evaluate('''(content) => {
-                    let editor = document.querySelector('[contenteditable="true"]');
-                    if (!editor) {
-                        const frames = document.querySelectorAll('iframe');
-                        for (let f of frames) {
-                            try {
-                                const fce = f.contentDocument.querySelector('[contenteditable="true"]');
-                                if (fce) { editor = fce; break; }
-                            } catch(err) {}
-                        }
-                    }
-                    if (editor) {
-                        editor.focus();
-                        // React等のエディタ向けにPasteイベントを偽装
-                        const dt = new DataTransfer();
-                        dt.setData('text/html', content);
-                        dt.setData('text/plain', content);
-                        const pasteEvent = new ClipboardEvent('paste', {
-                            clipboardData: dt,
-                            bubbles: true,
-                            cancelable: true
-                        });
-                        editor.dispatchEvent(pasteEvent);
-                        
-                        // 念のため、execCommandも実行
-                        editor.ownerDocument.execCommand('insertHTML', false, content);
-                    } else {
-                        // HTMLビューの場合はtextarea
-                        const ta = document.querySelector('textarea.html-textarea') || document.querySelector('textarea');
-                        if (ta) {
-                            ta.value = content;
-                            ta.dispatchEvent(new Event('input', { bubbles: true }));
-                            ta.dispatchEvent(new Event('change', { bubbles: true }));
-                        }
-                    }
-                }''', content)
+                # 1. iframe内部の正しいエディタ領域にフォーカスして本文を入力
+                try:
+                    frame = page.frame_locator('.blogger-iframe, iframe').first
+                    editor = frame.locator('[contenteditable="true"], body').first
+                    editor.click(timeout=10000)
+                    time.sleep(1)
+                    
+                    page.keyboard.press('Meta+A')
+                    page.keyboard.press('Control+A')
+                    page.keyboard.press('Backspace')
+                    time.sleep(0.5)
+                    
+                    page.keyboard.insert_text(content)
+                    print("Successfully entered content via frame_locator.")
+                except Exception as e:
+                    print("Failed to input content via frame_locator:", e)
+                
                 time.sleep(3)
 
-                # 2. 公開ショートカット (Ctrl+Shift+P または Cmd+Shift+P) で公開を試みる
-                page.keyboard.press('Control+Shift+P')
-                time.sleep(1)
-                page.keyboard.press('Meta+Shift+P') # Mac用
+                # 2. 公開ボタンのクリック
+                try:
+                    pub_btn = page.locator('[aria-label="公開"], [aria-label="Publish"], span:has-text("公開")').locator("visible=true").first
+                    pub_btn.click(timeout=10000)
+                    print("Clicked publish button.")
+                except Exception as e:
+                    print("Failed to click publish button:", e)
+                    # フォールバック：JSクリック
+                    page.evaluate('''() => {
+                        const btns = Array.from(document.querySelectorAll('span, div[role="button"]'));
+                        const pBtn = btns.find(b => (b.innerText||'').trim() === '公開' || (b.innerText||'').trim() === 'Publish');
+                        if (pBtn) pBtn.click();
+                    }''')
+                
                 time.sleep(3)
 
-                # 3. ショートカットが効かなかった時のために、Playwrightのネイティブ機能でクリック
+                # 3. 確認ダイアログの「確認」ボタンをクリック
                 try:
-                    pub_btn = page.locator('div[role="button"][aria-label="公開"], div[role="button"][aria-label="Publish"]').filter(state="visible").first
-                    pub_btn.click(timeout=5000)
-                except:
-                    pass
-                time.sleep(2)
-
-                # 4. 確認ダイアログの「確認」ボタン
-                page.keyboard.press('Enter')
-                time.sleep(1)
-                try:
-                    conf_btn = page.locator('div[role="button"][aria-label="確認"], div[role="button"][aria-label="Confirm"], div[role="button"]:has-text("確認")').filter(state="visible").first
-                    conf_btn.click(timeout=5000)
-                except:
-                    pass
-                time.sleep(4)
+                    conf_btn = page.locator('[aria-label="確認"], [aria-label="Confirm"], span:has-text("確認")').locator("visible=true").first
+                    conf_btn.click(timeout=10000)
+                    print("Clicked confirm button.")
+                except Exception as e:
+                    print("Failed to click confirm button:", e)
+                    # フォールバック：JSクリック
+                    page.evaluate('''() => {
+                        const btns = Array.from(document.querySelectorAll('span, div[role="button"]'));
+                        const cBtn = btns.find(b => (b.innerText||'').trim() === '確認' || (b.innerText||'').trim() === 'Confirm');
+                        if (cBtn) cBtn.click();
+                    }''')
+                
+                time.sleep(15)
 
                 print("Successfully posted using Playwright!")
             except Exception as e:
