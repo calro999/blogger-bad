@@ -266,7 +266,7 @@ def post_to_blogger(title, content):
                 # 2. 本文入力（システムクリップボードを利用した究極のCtrl+V作戦）
                 try:
                     # クリップボードにHTMLを書き込む
-                    page.evaluate("navigator.clipboard.writeText(arguments[0])", content)
+                    page.evaluate("(text) => navigator.clipboard.writeText(text)", content)
                     time.sleep(1)
                     
                     # iframe内部のエディタにフォーカス
@@ -296,7 +296,7 @@ def post_to_blogger(title, content):
 
                 # 3. 公開ボタンのクリック
                 try:
-                    pub_btn = page.locator('[aria-label="公開"], [aria-label="Publish"]').filter(state="visible").first
+                    pub_btn = page.locator('[aria-label="公開"], [aria-label="Publish"]').locator("visible=true").first
                     pub_btn.scroll_into_view_if_needed()
                     time.sleep(1)
                     pub_btn.click(force=True, timeout=10000)
@@ -311,7 +311,7 @@ def post_to_blogger(title, content):
 
                 # 4. 確認ダイアログの「確認」ボタン
                 try:
-                    conf_btn = page.locator('[aria-label="確認"], [aria-label="Confirm"], div[role="button"]:has-text("確認")').filter(state="visible").first
+                    conf_btn = page.locator('[aria-label="確認"], [aria-label="Confirm"], div[role="button"]:has-text("確認")').locator("visible=true").first
                     conf_btn.scroll_into_view_if_needed()
                     time.sleep(1)
                     conf_btn.click(force=True, timeout=10000)
