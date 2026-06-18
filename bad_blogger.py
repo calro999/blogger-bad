@@ -216,90 +216,86 @@ def post_to_blogger(title, content):
                 title_input.fill(title)
                 time.sleep(random.uniform(1.0, 2.0))
 
-                view_switch = page.locator('[aria-label="View mode"], [aria-label="表示モード"]').first
-                if view_switch.is_visible():
-                    view_switch.click()
-                    time.sleep(random.uniform(0.5, 1.0))
-                    html_view_btn = page.locator('[aria-label="HTML view"], [aria-label="HTML ビュー"], span:has-text("HTML")').first
-                    if html_view_btn.is_visible():
-                        html_view_btn.click()
-                        time.sleep(random.uniform(1.0, 2.0))
+                # 確実なHTMLビューへの切り替え
+                page.evaluate('''() => {
+                    const btns = Array.from(document.querySelectorAll('span[role="button"], div[role="button"]'));
+                    const modeBtn = btns.find(b => {
+                        const label = b.getAttribute('aria-label') || '';
+                        return label === '表示モード' || label === 'View mode';
+                    });
+                    if (modeBtn) modeBtn.click();
+                }''')
+                time.sleep(2)
+                
+                page.evaluate('''() => {
+                    const els = Array.from(document.querySelectorAll('span, div[role="menuitem"]'));
+                    const htmlBtn = els.find(b => {
+                        const text = b.innerText || '';
+                        return text.includes('HTML ビュー') || text.includes('HTML view');
+                    });
+                    if (htmlBtn) htmlBtn.click();
+                }''')
+                time.sleep(2)
 
-                try:
-                    editor_area = page.locator('.CodeMirror, textarea.html-textarea, iframe').last
-                    editor_area.click()
-                    time.sleep(1)
-                    
-                    page.keyboard.press('Meta+A')
-                    page.keyboard.press('Control+A')
-                    page.keyboard.press('Backspace')
-                    time.sleep(0.5)
-                    
-                    page.keyboard.insert_text(content)
-                except Exception as e:
-                    print("Fallback to JS injection due to error:", e)
-                    page.evaluate('''(content) => {
+                # HTMLビューのtextareaに確実に入力
+                page.evaluate('''(content) => {
+                    const ta = Array.from(document.querySelectorAll('textarea')).pop();
+                    if (ta) {
+                        ta.value = content;
+                        ta.dispatchEvent(new Event('input', { bubbles: true }));
+                        ta.dispatchEvent(new Event('change', { bubbles: true }));
+                    } else {
+                        // textareaがない場合はiframeの中のcontenteditableを探す
                         const frames = document.querySelectorAll('iframe');
                         for (let f of frames) {
                             try {
                                 const fce = f.contentDocument.querySelector('[contenteditable="true"]');
-                                if (fce) { 
+                                if (fce) {
                                     fce.focus();
                                     f.contentDocument.execCommand('insertHTML', false, content);
-                                    return; 
+                                    return;
                                 }
                             } catch(err) {}
                         }
                         const ce = document.querySelector('[contenteditable="true"]');
-                        if (ce) { 
+                        if (ce) {
                             ce.focus();
                             document.execCommand('insertHTML', false, content);
-                            return; 
                         }
-                        const ta = document.querySelector('textarea.html-textarea') || document.querySelector('textarea');
-                        if (ta) { 
-                            ta.value = content; 
-                            ta.dispatchEvent(new Event('input', { bubbles: true })); 
-                            ta.dispatchEvent(new Event('change', { bubbles: true }));
-                            return; 
-                        }
-                    }''', content)
+                    }
+                }''', content)
+                time.sleep(3)
 
-                time.sleep(random.uniform(2.0, 3.0))
+                # 公開ボタンをクリック（マウスイベントを完全エミュレート）
+                page.evaluate('''() => {
+                    const btns = Array.from(document.querySelectorAll('div[role="button"]'));
+                    const pubBtn = btns.find(b => {
+                        const label = b.getAttribute('aria-label') || '';
+                        return label === '公開' || label === 'Publish';
+                    });
+                    if (pubBtn) {
+                        pubBtn.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+                        pubBtn.dispatchEvent(new MouseEvent('mouseup', {bubbles: true}));
+                        pubBtn.click();
+                    }
+                }''')
+                time.sleep(3)
 
-                # 公開ボタンをクリック（表示されている要素のみを対象にする）
-                try:
-                    page.evaluate('''() => {
-                        const allEls = Array.from(document.querySelectorAll('div[role="button"], span[role="button"], button, div'));
-                        const visibleEls = allEls.filter(b => b.offsetParent !== null);
-                        const pubBtn = visibleEls.find(b => {
-                            const label = b.getAttribute('aria-label') || '';
-                            const text = b.innerText || '';
-                            return label.includes('公開') || label.includes('Publish') || text.trim() === '公開' || text.trim() === 'Publish';
-                        });
-                        if (pubBtn) pubBtn.click();
-                    }''')
-                except Exception as e:
-                    print("Publish click error:", e)
-                
-                time.sleep(random.uniform(2.0, 3.0))
-
-                # 確認ボタンをクリック（表示されている要素のみを対象にする）
-                try:
-                    page.evaluate('''() => {
-                        const allEls = Array.from(document.querySelectorAll('div[role="button"], span[role="button"], button, div'));
-                        const visibleEls = allEls.filter(b => b.offsetParent !== null);
-                        const confBtn = visibleEls.find(b => {
-                            const label = b.getAttribute('aria-label') || '';
-                            const text = b.innerText || '';
-                            return label.includes('確認') || label.includes('Confirm') || text.trim() === '確認' || text.trim() === 'Confirm';
-                        });
-                        if (confBtn) confBtn.click();
-                    }''')
-                except Exception as e:
-                    print("Confirm click error:", e)
-                
-                time.sleep(random.uniform(3.0, 5.0))
+                # 確認ダイアログの「確認」ボタンをクリック
+                page.evaluate('''() => {
+                    const btns = Array.from(document.querySelectorAll('div[role="button"], span[role="button"], button'));
+                    const confBtn = btns.find(b => {
+                        const text = b.innerText || '';
+                        const label = b.getAttribute('aria-label') || '';
+                        return text.trim() === '確認' || text.trim() === 'Confirm' || label === '確認' || label === 'Confirm';
+                    });
+                    if (confBtn) {
+                        confBtn.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+                        confBtn.dispatchEvent(new MouseEvent('mouseup', {bubbles: true}));
+                        confBtn.click();
+                    }
+                }''')
+                time.sleep(5)
 
                 print("Successfully posted using Playwright!")
             except Exception as e:
