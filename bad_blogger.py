@@ -263,42 +263,67 @@ def post_to_blogger(title, content):
                 page.keyboard.press('Meta+A')
                 page.keyboard.press('Control+A')
                 page.keyboard.press('Backspace')
-                title_input.fill(title)
-                time.sleep(2)
-
-                # 2. 本文入力（iframeへの確実なフォーカスとクリップボード/execCommand経由ペースト）
-                try:
-                    print("Focusing on the rich text editor body...")
-                    # iframe（リッチテキストエディタ）が存在するか確認してクリック
-                    editor_frame = page.frame_locator('.blogger-rich-text-editor, iframe').first
+                # 1-2. タイトルと本文入力（検証ループ付き）
+                max_retries = 3
+                success = False
+                
+                for attempt in range(max_retries):
+                    print(f"--- Attempt {attempt+1} / {max_retries} ---")
+                    
+                    if attempt > 0:
+                        print("Reloading page for retry...")
+                        page.reload(wait_until="domcontentloaded")
+                        time.sleep(3)
+                    
                     try:
-                        editor_body = editor_frame.locator('body').first
-                        editor_body.click(timeout=5000)
-                        print("Clicked inside iframe body.")
-                    except:
-                        print("Iframe not found or unclickable, trying contenteditable div...")
-                        editor_div = page.locator('[contenteditable="true"]').last
-                        editor_div.click(timeout=5000)
-                    
-                    time.sleep(1)
-
-                    print("Injecting HTML...")
-                    # 確実に本文にフォーカスがある状態で、execCommandを実行（クリップボードは権限エラーになる場合があるので確実なexecCommandを使用）
-                    page.evaluate("html => document.execCommand('insertHTML', false, html)", content)
-                    
-                    time.sleep(1)
-                    
-                    # 念のため最後にスペースを打ってWizのオートセーブを誘発
-                    page.keyboard.press('Space')
-                    time.sleep(0.5)
-                    page.keyboard.press('Backspace')
-                    page.keyboard.insert_text('​') # ゼロ幅スペース
-                    
-                    print("Waiting for Blogger to autosave the pasted content...")
-                    time.sleep(5)
-                    
-                except Exception as e:
-                    print("Failed to inject HTML:", e)
+                        title_input = page.locator('input.titleField, input[aria-label="タイトル"], input[aria-label="Title"]').locator("visible=true").first
+                        title_input.fill(title)
+                        time.sleep(2)
+                        
+                        print("Focusing on the rich text editor body...")
+                        editor_frame = page.frame_locator('.blogger-rich-text-editor, iframe').first
+                        
+                        try:
+                            editor_body = editor_frame.locator('body').first
+                            editor_body.wait_for(state="visible", timeout=5000)
+                            print("Found iframe body.")
+                        except:
+                            print("Iframe not found, trying contenteditable div...")
+                            editor_body = page.locator('[contenteditable="true"]').last
+                            editor_body.wait_for(state="visible", timeout=5000)
+                            
+                        # innerHTMLで直接流し込む
+                        print("Injecting HTML via innerHTML...")
+                        editor_body.evaluate('(el, html) => { el.innerHTML = html; }', content)
+                        time.sleep(1)
+                        
+                        # Wizオートセーブ誘発のためのダミータイピング
+                        print("Triggering Wiz autosave...")
+                        editor_body.press('Space')
+                        time.sleep(0.5)
+                        editor_body.press('Backspace')
+                        time.sleep(2)
+                        
+                        # --- 本文入力の検証 ---
+                        print("Validating injected content...")
+                        actual_html = editor_body.evaluate('(el) => el.innerHTML')
+                        print(f"Length of injected content: {len(actual_html)}")
+                        
+                        if len(actual_html) > 50 and "<img" in actual_html:
+                            print("Validation passed: Body content and images successfully injected!")
+                            success = True
+                            break
+                        else:
+                            print("Validation failed: Body is still empty or missing images.")
+                            print("Actual HTML snippet:", actual_html[:200])
+                            
+                    except Exception as e:
+                        print(f"Error during injection attempt {attempt+1}: {e}")
+                        
+                    time.sleep(3)
+                
+                if not success:
+                    raise Exception("Critical Failure: Could not inject body content after 3 attempts. Aborting save to prevent empty drafts.")
 
                 # 3. 下書き保存処理（公開ボタンを押さない）
                 print("Saving as draft...")
