@@ -171,20 +171,17 @@ def generate_article_with_llm(item):
             )
             if response.status_code == 200 and len(response.text.strip()) > 100:
                 result_text = response.text.strip()
-                    import json
-                    try:
-                        if "```json" in result_text: result_text = result_text.split("```json", 1)[1]
-                        if "```" in result_text: result_text = result_text.split("```")[0]
-                        result_text = result_text.strip()
-                        parsed = json.loads(result_text)
-                        return parsed
-                    except:
-                        return {"title": "【注目】" + title[:20] + "...", "html": result_text}
-                if "```html" in result:
-                    result = result.split("```html", 1)[1]
-                if "```" in result:
-                    result = result.split("```", 1)[0]
-                return result.strip()
+                import json
+                try:
+                    if "```json" in result_text: result_text = result_text.split("```json", 1)[1]
+                    if "```" in result_text: result_text = result_text.split("```")[0]
+                    result_text = result_text.strip()
+                    parsed = json.loads(result_text)
+                    return parsed
+                except:
+                    if "```html" in result_text: result_text = result_text.split("```html", 1)[1]
+                    if "```" in result_text: result_text = result_text.split("```", 1)[0]
+                    return {"title": "【注目】" + title[:20] + "...", "html": result_text.strip()}
             else:
                 print(f"Pollinations AI ({model}) returned status code: {response.status_code} - {response.text[:200]}")
         except Exception as e:
