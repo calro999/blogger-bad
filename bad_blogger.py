@@ -269,7 +269,6 @@ def post_to_blogger(title, content):
                 # 2. 本文入力（iframeへの確実なフォーカスとクリップボード/execCommand経由ペースト）
                 try:
                     print("Focusing on the rich text editor body...")
-                    import time
                     # iframe（リッチテキストエディタ）が存在するか確認してクリック
                     editor_frame = page.frame_locator('.blogger-rich-text-editor, iframe').first
                     try:
