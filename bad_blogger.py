@@ -266,58 +266,33 @@ def post_to_blogger(title, content):
                 title_input.fill(title)
                 time.sleep(2)
 
-                # 2. 本文入力（UIボタンによる確実なHTMLビュー切り替え ＋ keyboard.type による人間的入力）
+                # 2. 本文入力（究極の解決策：execCommandによる直接挿入 ＋ ダミータイピングによるWizオートセーブ誘発）
                 try:
-                    print("Attempting to switch to HTML view via UI buttons...")
-                    toolbar = page.locator('div[role="toolbar"]').first
-                    toolbar.wait_for(state="visible", timeout=10000)
-                    
-                    mode_btn = toolbar.locator('div[role="button"]').first
-                    mode_btn.click()
+                    print("Focusing on the rich text editor...")
+                    # Bloggerのリッチテキストエディタは通常iframeの中か、contenteditableなdiv
+                    # まずTabキーでタイトルから本文へフォーカスを移す
+                    page.keyboard.press('Tab')
                     time.sleep(1)
                     
-                    html_view_btn = page.locator('div[role="menuitem"]').filter(has_text=re.compile(r'HTML', re.IGNORECASE)).first
-                    if html_view_btn.is_visible():
-                        html_view_btn.click()
-                        print("Switched to HTML view.")
-                    else:
-                        print("HTML view button not found! Pressing shortcut as fallback.")
-                        page.keyboard.press('Control+Shift+Backslash')
-                        page.keyboard.press('Meta+Shift+Backslash')
-                    
-                    time.sleep(2)
-                    
-                    html_textarea = page.locator('textarea.html-textarea, textarea').locator("visible=true").first
-                    if html_textarea.is_visible():
-                        html_textarea.click()
-                        time.sleep(1)
-                        page.keyboard.press('Control+A')
-                        page.keyboard.press('Meta+A')
-                        page.keyboard.press('Backspace')
-                        time.sleep(1)
-                        
-                        print("Typing HTML content natively...")
-                        page.keyboard.type(content, delay=5)
-                        print("Successfully typed HTML via textarea.")
-                    else:
-                        print("HTML textarea not visible, falling back to basic insertText...")
-                        page.keyboard.insert_text(content)
-                        
-                    time.sleep(2)
-                    
-                    print("Switching back to compose view to commit HTML...")
-                    mode_btn.click()
+                    # 万が一フォーカスが当たっていない場合を考慮し、画面中央をクリック
+                    page.mouse.click(640, 400)
                     time.sleep(1)
+
+                    print("Injecting HTML via execCommand...")
+                    # execCommandでHTMLを直接挿入
+                    page.evaluate("html => document.execCommand('insertHTML', false, html)", content)
+                    time.sleep(1)
+
+                    print("Triggering Wiz autosave by typing a dummy character...")
+                    # ★超重要★ Wizの監視システムに変更を認識させるため、スペースを1つ打ち込み、Backspaceで消す
+                    page.keyboard.press('Space')
+                    time.sleep(0.5)
+                    page.keyboard.press('Backspace')
                     
-                    compose_view_btn = page.locator('div[role="menuitem"]').filter(has_text=re.compile(r'作成|Compose', re.IGNORECASE)).first
-                    if compose_view_btn.is_visible():
-                        compose_view_btn.click()
-                        print("Switched to Compose view.")
-                    else:
-                        page.keyboard.press('Control+Shift+Backslash')
-                        page.keyboard.press('Meta+Shift+Backslash')
-                        
-                    print("Waiting for Blogger to autosave and parse the content...")
+                    # 念のため、もう一つ確実な文字を打つ（非表示になるようなゼロ幅スペースなど）
+                    page.keyboard.insert_text('​')
+                    
+                    print("Waiting for Blogger to autosave the injected content...")
                     time.sleep(8)
                     
                 except Exception as e:
@@ -325,7 +300,7 @@ def post_to_blogger(title, content):
                     
                 time.sleep(5)
 
-                                                # 3. 公開ボタンのクリック
+                                                                # 3. 公開ボタンのクリック
                 try:
                     pub_btn = page.locator('[aria-label="公開"], [aria-label="Publish"]').locator("visible=true").first
                     pub_btn.scroll_into_view_if_needed()
