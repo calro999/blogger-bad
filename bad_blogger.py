@@ -273,14 +273,14 @@ def post_to_blogger(title, content):
                     time.sleep(1)
                     
                     # HTMLビュー/作成ビュー切り替えショートカット (Ctrl+Shift+\)
-                    page.keyboard.press('Control+Shift+\')
-                    page.keyboard.press('Meta+Shift+\')
+                    page.keyboard.press('Control+Shift+Backslash')
+                    page.keyboard.press('Meta+Shift+Backslash')
                     time.sleep(2)
                     
                     # 念のためもう一度（すでにHTMLビューだった場合戻ってしまう対策は、textareaの存在確認で行う）
                     if not page.locator('textarea.html-textarea').is_visible():
-                        page.keyboard.press('Control+Shift+\')
-                        page.keyboard.press('Meta+Shift+\')
+                        page.keyboard.press('Control+Shift+Backslash')
+                        page.keyboard.press('Meta+Shift+Backslash')
                         time.sleep(2)
                         
                     # HTMLビューのテキストエリアに直接流し込む
