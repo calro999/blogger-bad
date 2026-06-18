@@ -266,33 +266,36 @@ def post_to_blogger(title, content):
                 title_input.fill(title)
                 time.sleep(2)
 
-                # 2. 本文入力（究極の解決策：iframe/contenteditable特定とフォーカス＋execCommand）
+                # 2. 本文入力（iframeへの確実なフォーカスとクリップボード/execCommand経由ペースト）
                 try:
-                    print("Focusing on the rich text editor...")
-                    page.keyboard.press('Tab')
-                    time.sleep(1)
-                    page.mouse.click(640, 400)
-                    time.sleep(1)
-
-                    print("Injecting HTML via execCommand with precise focus...")
-                    page.evaluate('''html => {
-                        let editor = document.querySelector('iframe.blogger-rich-text-editor')?.contentWindow?.document?.body;
-                        if (!editor) editor = document.querySelector('[contenteditable="true"]');
-                        if (editor) {
-                            editor.focus();
-                            document.execCommand('insertHTML', false, html);
-                        } else {
-                            document.execCommand('insertHTML', false, html);
-                        }
-                    }''', content)
+                    print("Focusing on the rich text editor body...")
+                    import time
+                    # iframe（リッチテキストエディタ）が存在するか確認してクリック
+                    editor_frame = page.frame_locator('.blogger-rich-text-editor, iframe').first
+                    try:
+                        editor_body = editor_frame.locator('body').first
+                        editor_body.click(timeout=5000)
+                        print("Clicked inside iframe body.")
+                    except:
+                        print("Iframe not found or unclickable, trying contenteditable div...")
+                        editor_div = page.locator('[contenteditable="true"]').last
+                        editor_div.click(timeout=5000)
+                    
                     time.sleep(1)
 
-                    print("Triggering Wiz autosave by typing a dummy character...")
+                    print("Injecting HTML...")
+                    # 確実に本文にフォーカスがある状態で、execCommandを実行（クリップボードは権限エラーになる場合があるので確実なexecCommandを使用）
+                    page.evaluate("html => document.execCommand('insertHTML', false, html)", content)
+                    
+                    time.sleep(1)
+                    
+                    # 念のため最後にスペースを打ってWizのオートセーブを誘発
                     page.keyboard.press('Space')
                     time.sleep(0.5)
                     page.keyboard.press('Backspace')
+                    page.keyboard.insert_text('​') # ゼロ幅スペース
                     
-                    print("Waiting for Blogger to autosave the injected content...")
+                    print("Waiting for Blogger to autosave the pasted content...")
                     time.sleep(5)
                     
                 except Exception as e:
@@ -353,11 +356,6 @@ def main():
         print("--------------------------------------")
         
         post_to_blogger(gen_title, html_content)
-        # 既存の content という変数名を使っている場所の対策
-        content = html_content
-
-        # 3. Bloggerに投稿
-        post_to_blogger(gen_title, content)
 
         # 4. キャッシュに保存
         save_to_cache(item_code)
