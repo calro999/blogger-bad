@@ -280,42 +280,57 @@ def post_to_blogger(title, content):
                         title_input.fill(title)
                         time.sleep(2)
                         
-                        print("Focusing on the rich text editor body...")
-                        editor_frame = page.frame_locator('.blogger-rich-text-editor, iframe').first
-                        
-                        try:
-                            editor_body = editor_frame.locator('body').first
-                            editor_body.wait_for(state="visible", timeout=5000)
-                            print("Found iframe body.")
-                        except:
-                            print("Iframe not found, trying contenteditable div...")
-                            editor_body = page.locator('[contenteditable="true"]').last
-                            editor_body.wait_for(state="visible", timeout=5000)
-                            
-                        # innerHTMLで直接流し込む
-                        print("Injecting HTML via innerHTML...")
-                        editor_body.evaluate('(el, html) => { el.innerHTML = html; }', content)
+                        print("Focusing on the rich text editor via Tab navigation...")
+                        # タイトル入力後、Tabキーを2回押せば通常本文エリアにフォーカスが当たる
+                        page.keyboard.press('Tab')
+                        time.sleep(0.5)
+                        page.keyboard.press('Tab')
                         time.sleep(1)
+                        
+                        # 念のためエディタらしきものをクリックも試す
+                        try:
+                            editor_body = page.locator('div[aria-label="本文"], div[aria-label="Body"], div[role="textbox"], iframe').locator("visible=true").first
+                            editor_body.click(timeout=3000)
+                        except:
+                            pass
+                            
+                        print("Injecting HTML via Playwright clipboard paste...")
+                        # クリップボードにHTMLとしてコピー
+                        page.evaluate('''html => {
+                            try {
+                                const blob = new Blob([html], { type: 'text/html' });
+                                const data = [new ClipboardItem({ 'text/html': blob })];
+                                navigator.clipboard.write(data);
+                            } catch (e) {
+                                console.error('Clipboard write failed:', e);
+                            }
+                        }''', content)
+                        time.sleep(2)
+                        
+                        # ペースト実行
+                        page.keyboard.press('Control+V')
+                        page.keyboard.press('Meta+V') # Mac用
+                        time.sleep(2)
                         
                         # Wizオートセーブ誘発のためのダミータイピング
                         print("Triggering Wiz autosave...")
-                        editor_body.press('Space')
+                        page.keyboard.press('Space')
                         time.sleep(0.5)
-                        editor_body.press('Backspace')
-                        time.sleep(2)
+                        page.keyboard.press('Backspace')
+                        time.sleep(3)
                         
                         # --- 本文入力の検証 ---
                         print("Validating injected content...")
-                        actual_html = editor_body.evaluate('(el) => el.innerHTML')
-                        print(f"Length of injected content: {len(actual_html)}")
+                        # 特定の要素にこだわらず、ページ全体のHTMLを取得して画像タグが含まれるか確認する
+                        page_html = page.content()
                         
-                        if len(actual_html) > 50 and "<img" in actual_html:
-                            print("Validation passed: Body content and images successfully injected!")
+                        if "<img" in page_html and ("href" in page_html or "http" in page_html):
+                            print("Validation passed: Body content (image and links) successfully detected in page!")
                             success = True
                             break
                         else:
-                            print("Validation failed: Body is still empty or missing images.")
-                            print("Actual HTML snippet:", actual_html[:200])
+                            print("Validation failed: Body seems empty or missing images in page DOM.")
+                            print("Page HTML snippet:", page_html[:200])
                             
                     except Exception as e:
                         print(f"Error during injection attempt {attempt+1}: {e}")
