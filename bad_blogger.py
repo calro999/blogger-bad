@@ -141,7 +141,7 @@ def generate_article_with_llm(item):
                     return parsed # 辞書を返す
                 except Exception as e:
                     print("JSON Parse error:", e)
-                    return {"title": "【注目】" + title[:20], "html": result_text}
+                    return {"title": "【注目】" + title[:20] + "...", "html": result_text}
                 if "```html" in result:
                     result = result.split("```html", 1)[1]
                 if "```" in result:
@@ -180,7 +180,7 @@ def generate_article_with_llm(item):
                         parsed = json.loads(result_text)
                         return parsed
                     except:
-                        return {"title": "【注目】" + title[:20], "html": result_text}
+                        return {"title": "【注目】" + title[:20] + "...", "html": result_text}
                 if "```html" in result:
                     result = result.split("```html", 1)[1]
                 if "```" in result:
@@ -316,7 +316,49 @@ def post_to_blogger(title, content):
 
                 time.sleep(3)
                 print("Successfully saved draft using Playwright!")
-                
+            except Exception as e:
+                print(f"Error occurred. Current URL: {page.url}")
+                print(f"Page Title: {page.title()}")
+                print(f"Page Content Snippet: {page.content()[:1000]}")
+                raise e
+
+    finally:
+        if os.path.exists(session_file_path):
+            os.remove(session_file_path)
+
+def main():
+    try:
+        # 1. 楽天から商品取得
+        item = fetch_rakuten_item()
+        item_code = item.get("itemCode")
+        title = item.get("itemName")
+        print(f"Selected Item: {title} ({item_code})")
+
+        # 2. LLMで記事生成
+        llm_result = generate_article_with_llm(item)
+        if isinstance(llm_result, dict):
+            gen_title = llm_result.get("title", title[:30])
+            html_content = llm_result.get("html", "")
+        else:
+            gen_title = title[:30]
+            html_content = str(llm_result)
+            
+        if not html_content or len(html_content) < 10:
+            # AIが失敗した時の絶対的なフォールバックHTML
+            image_url = item.get("mediumImageUrls", [{"imageUrl": ""}])[0].get("imageUrl", "") if item.get("mediumImageUrls") else ""
+            html_content = f'<h2>{gen_title}</h2><br><br><img src="{image_url}" alt="商品画像" style="max-width: 100%; height: auto;"><br><br><a href="{url}" target="_blank">商品詳細を見る ＞</a><br><br><a href="https://room.rakuten.co.jp/jack555/items" target="_blank">✅ 私の楽天ROOMはこちら</a>'
+            
+        print("--- Generated HTML Content Snippet ---")
+        print(html_content[:200])
+        print("--------------------------------------")
+        
+        post_to_blogger(gen_title, html_content)
+        # 既存の content という変数名を使っている場所の対策
+        content = html_content
+
+        # 3. Bloggerに投稿
+        post_to_blogger(gen_title, content)
+
         # 4. キャッシュに保存
         save_to_cache(item_code)
         print("Process completed successfully.")
