@@ -94,6 +94,7 @@ def generate_article_with_llm(item):
 【価格】: {price}円
 【商品画像URL】: {image_url}
 【アフィリエイトURL】: {url}
+【楽天ROOM】: https://room.rakuten.co.jp/jack555/items
 
 以下の要件を厳格に遵守してください：
 1. 出力は以下のJSONフォーマットのみとしてください。他のテキストは一切含めないでください。
@@ -105,7 +106,9 @@ def generate_article_with_llm(item):
    - 記事全体を `<div class="premium-squishy-article">` と `</div>` で囲む
    - 商品の魅力的な説明（`<div class="premium-content-body">` と `</div>` で囲む）
    - 極上の贅沢ポイント3選（`<ul class="premium-points-list">` と `<li>` タグを使用）
-   - アフィリエイトリンク（`<a class="premium-affiliate-btn" href="{url}" target="_blank" rel="noopener noreferrer">プレミアム詳細を見る ＞</a>`）
+   - 商品の画像（`<img src="{image_url}" alt="{title}" style="max-width: 100%; height: auto;">`）
+   - アフィリエイトリンク（`<a class="premium-affiliate-btn" href="{url}" target="_blank" rel="noopener noreferrer">商品詳細を見る ＞</a>`）
+   - 楽天ROOMへのリンク（`<br><a href="https://room.rakuten.co.jp/jack555/items" target="_blank">✅ 私の楽天ROOMはこちら</a>`）を必ず含めること
 """
 
     # 1. GitHub Models API (GITHUB_TOKENを使用) を最優先
@@ -263,36 +266,47 @@ def post_to_blogger(title, content):
                 title_input.fill(title)
                 time.sleep(2)
 
-                # 2. 本文入力（システムクリップボードを利用した究極のCtrl+V作戦）
+                # 2. 本文入力（ブラウザ内部JSによる直接的な execCommand と input イベント発火）
                 try:
-                    # クリップボードにHTMLを書き込む
-                    page.evaluate("(text) => navigator.clipboard.writeText(text)", content)
-                    time.sleep(1)
-                    
-                    # iframe内部のエディタにフォーカス
-                    frame = page.frame_locator('.blogger-iframe, iframe').first
-                    editor = frame.locator('[contenteditable="true"], body').first
-                    editor.click(timeout=10000)
-                    editor.focus()
-                    time.sleep(1)
-                    
-                    # 全選択してクリア
-                    page.keyboard.press('Meta+A')
-                    page.keyboard.press('Control+A')
-                    page.keyboard.press('Backspace')
-                    time.sleep(1)
-                    
-                    # システムのペーストコマンドを発行
-                    # MacとWin両方のショートカットを送信
-                    page.keyboard.press('Control+V')
-                    time.sleep(0.5)
-                    page.keyboard.press('Meta+V')
+                    # iframeが表示されるまで確実に待つ
+                    page.wait_for_selector('.blogger-iframe', state="visible", timeout=15000)
                     time.sleep(2)
-                    print("Successfully pasted content via OS clipboard shortcut.")
+                    
+                    # ブラウザ内のJSでエディタに直接HTMLを叩き込む
+                    page.evaluate('''([html]) => {
+                        const iframe = document.querySelector('.blogger-iframe');
+                        if (!iframe) throw new Error("Iframe not found");
+                        const editor = iframe.contentDocument.body;
+                        if (!editor) throw new Error("Editor body not found");
+                        
+                        // エディタにフォーカスを強制
+                        editor.focus();
+                        
+                        // 全選択＆削除
+                        iframe.contentDocument.execCommand('selectAll', false, null);
+                        iframe.contentDocument.execCommand('delete', false, null);
+                        
+                        // HTMLを挿入
+                        const success = iframe.contentDocument.execCommand('insertHTML', false, html);
+                        if (!success) throw new Error("insertHTML failed");
+                        
+                        // React/Wizに状態変更を強制認識させるためのイベント連打
+                        editor.dispatchEvent(new Event('input', { bubbles: true }));
+                        editor.dispatchEvent(new Event('change', { bubbles: true }));
+                        
+                        // 万が一のためにinnerHTMLも直接書き換える
+                        if (editor.innerHTML.length < 10) {
+                            editor.innerHTML = html;
+                            editor.dispatchEvent(new Event('input', { bubbles: true }));
+                        }
+                    }''', [content])
+                    
+                    print("Successfully injected HTML via JS.")
                 except Exception as e:
-                    print("Failed to paste content:", e)
-                
-                time.sleep(3)
+                    print("Failed to inject HTML:", e)
+                    
+                # 保存処理が走るのを待機
+                time.sleep(5)
 
                 # 3. 公開ボタンのクリック
                 try:
