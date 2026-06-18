@@ -232,30 +232,67 @@ def post_to_blogger(title, content):
                 title_input.fill(title)
                 time.sleep(random.uniform(1.0, 2.0))
 
-                # 1. 物理クリックによる確実なHTMLビュー切り替え
-                click_physical(page, '[aria-label="表示モード"], [aria-label="View mode"]')
-                time.sleep(1.5)
-                
-                click_physical(page, '[role="menuitem"]:has-text("HTML"), span:has-text("HTML")')
-                time.sleep(1.5)
+                # 1. 本文エリアにフォーカスし、ペーストイベントを偽装してHTMLを入力する
+                page.evaluate('''(content) => {
+                    let editor = document.querySelector('[contenteditable="true"]');
+                    if (!editor) {
+                        const frames = document.querySelectorAll('iframe');
+                        for (let f of frames) {
+                            try {
+                                const fce = f.contentDocument.querySelector('[contenteditable="true"]');
+                                if (fce) { editor = fce; break; }
+                            } catch(err) {}
+                        }
+                    }
+                    if (editor) {
+                        editor.focus();
+                        // React等のエディタ向けにPasteイベントを偽装
+                        const dt = new DataTransfer();
+                        dt.setData('text/html', content);
+                        dt.setData('text/plain', content);
+                        const pasteEvent = new ClipboardEvent('paste', {
+                            clipboardData: dt,
+                            bubbles: true,
+                            cancelable: true
+                        });
+                        editor.dispatchEvent(pasteEvent);
+                        
+                        // 念のため、execCommandも実行
+                        editor.ownerDocument.execCommand('insertHTML', false, content);
+                    } else {
+                        // HTMLビューの場合はtextarea
+                        const ta = document.querySelector('textarea.html-textarea') || document.querySelector('textarea');
+                        if (ta) {
+                            ta.value = content;
+                            ta.dispatchEvent(new Event('input', { bubbles: true }));
+                            ta.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    }
+                }''', content)
+                time.sleep(3)
 
-                # 2. HTMLビューのテキストエリアに確実に入力
-                textareas = page.locator('textarea').all()
-                for ta in textareas:
-                    box = ta.bounding_box()
-                    if box and box['width'] > 0 and box['height'] > 0:
-                        ta.click()
-                        time.sleep(0.5)
-                        ta.fill(content)
-                        break
+                # 2. 公開ショートカット (Ctrl+Shift+P または Cmd+Shift+P) で公開を試みる
+                page.keyboard.press('Control+Shift+P')
+                time.sleep(1)
+                page.keyboard.press('Meta+Shift+P') # Mac用
+                time.sleep(3)
+
+                # 3. ショートカットが効かなかった時のために、Playwrightのネイティブ機能でクリック
+                try:
+                    pub_btn = page.locator('div[role="button"][aria-label="公開"], div[role="button"][aria-label="Publish"]').filter(state="visible").first
+                    pub_btn.click(timeout=5000)
+                except:
+                    pass
                 time.sleep(2)
 
-                # 3. 物理クリックによる確実な公開
-                click_physical(page, '[aria-label="公開"], [aria-label="Publish"]')
-                time.sleep(2)
-
-                # 4. 物理クリックによる確実な確認ダイアログ
-                click_physical(page, '[aria-label="確認"], [aria-label="Confirm"]')
+                # 4. 確認ダイアログの「確認」ボタン
+                page.keyboard.press('Enter')
+                time.sleep(1)
+                try:
+                    conf_btn = page.locator('div[role="button"][aria-label="確認"], div[role="button"][aria-label="Confirm"], div[role="button"]:has-text("確認")').filter(state="visible").first
+                    conf_btn.click(timeout=5000)
+                except:
+                    pass
                 time.sleep(4)
 
                 print("Successfully posted using Playwright!")
