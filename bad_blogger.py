@@ -493,6 +493,11 @@ def post_to_rakuten_room(item_code, comment):
                 page.goto(warp_url, wait_until="load", timeout=45000)
                 time.sleep(4)
 
+                # ログイン画面に飛ばされていないかチェック
+                if "login.rakuten.co.jp" in page.url or "login" in page.url.lower():
+                    print("Error: Session has expired or is invalid. Redirected to Rakuten login page. Skipping Rakuten Room post.")
+                    return
+
                 # 重複・すでにコレしているかチェック
                 page_html = page.content()
                 if any(term in page_html for term in ["すでにコレ", "すでに登録されています", "すでに登録"]):
