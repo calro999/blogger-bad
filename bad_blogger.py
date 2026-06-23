@@ -192,7 +192,7 @@ def generate_article_with_llm(item):
     raise RuntimeError("All LLM generation attempts failed.")
 
 def post_to_blogger(title, content):
-    session_b64 = os.environ.get("HATENA_SESSION_B64")
+    session_b64 = os.environ.get("BLOGGER_SESSION_B64")
     
     session_file_path = None
     if session_b64:
@@ -203,12 +203,12 @@ def post_to_blogger(title, content):
                 temp_file.write(decoded_str)
                 session_file_path = temp_file.name
         except Exception as e:
-            raise ValueError(f"HATENA_SESSION_B64 のデコードに失敗しました: {e}")
+            raise ValueError(f"BLOGGER_SESSION_B64 のデコードに失敗しました: {e}")
     elif os.path.exists("session.json"):
         print("Found local session.json. Using it for Blog Post.")
         session_file_path = "session.json"
     else:
-        raise ValueError(f"HATENA_SESSION_B64 is not set and local session.json not found.")
+        raise ValueError(f"BLOGGER_SESSION_B64 is not set and local session.json not found.")
 
     print(f"Posting to Blogger (Blog ID: {blog_id}) using Playwright...")
 
