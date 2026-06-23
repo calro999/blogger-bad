@@ -192,6 +192,9 @@ def generate_article_with_llm(item):
     raise RuntimeError("All LLM generation attempts failed.")
 
 def post_to_blogger(title, content):
+    blog_id = os.environ.get("BLOGGER_BLOG_ID")
+    if not blog_id:
+        raise ValueError("BLOGGER_BLOG_ID is not set in environment variables.")
     session_b64 = os.environ.get("BLOGGER_SESSION_B64")
     
     session_file_path = None
