@@ -37,6 +37,7 @@ jobs:
           RAKUTEN_ACCESS_KEY: ${{ secrets.RAKUTEN_ACCESS_KEY }}
           BLOGGER_SESSION_B64: ${{ secrets.BLOGGER_SESSION_B64 }}
           BLOGGER_BLOG_ID: ${{ secrets.BLOGGER_BLOG_ID }}
+          ROOM_SESSION_B64: ${{ secrets.ROOM_SESSION_B64 }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python bad_blogger.py
 
