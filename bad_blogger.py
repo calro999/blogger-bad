@@ -191,16 +191,7 @@ def generate_article_with_llm(item):
 
     raise RuntimeError("All LLM generation attempts failed.")
 
-def post_to_blogger(title, content)
-        
-        # 楽天ROOMへも自動「コレ！」投稿
-        try:
-            room_comment = generate_room_comment_with_llm(item)
-            print("Generated ROOM Comment:")
-            print(room_comment)
-            post_to_rakuten_room(item_code, room_comment)
-        except Exception as room_err:
-            print(f"Failed to post to Rakuten Room: {room_err}"):
+def post_to_blogger(title, content):
     session_b64 = os.environ.get("HATENA_SESSION_B64")
     
     session_file_path = None
@@ -534,7 +525,9 @@ def post_to_rakuten_room(item_code, comment):
     finally:
         if session_file_path and session_file_path != "session.json" and os.path.exists(session_file_path):
             os.remove(session_file_path)
-\n\ndef main():
+
+
+def main():
     try:
         # 1. 楽天から商品取得
         item = fetch_rakuten_item()
@@ -561,6 +554,15 @@ def post_to_rakuten_room(item_code, comment):
         print("--------------------------------------")
         
         post_to_blogger(gen_title, html_content)
+
+        # 楽天ROOMへも自動「コレ！」投稿
+        try:
+            room_comment = generate_room_comment_with_llm(item)
+            print("Generated ROOM Comment:")
+            print(room_comment)
+            post_to_rakuten_room(item_code, room_comment)
+        except Exception as room_err:
+            print(f"Failed to post to Rakuten Room: {room_err}")
 
         # 4. キャッシュに保存
         save_to_cache(item_code)
