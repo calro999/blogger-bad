@@ -74,3 +74,4 @@ stella-shop2032:10000139
 netshopkako:10004897
 lovesweet:10100407
 aoi-depart:10325212
+connectgate:10017867
