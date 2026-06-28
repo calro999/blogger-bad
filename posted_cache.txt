@@ -102,3 +102,4 @@ cinemacollection:10527841
 mercatostore:10001839
 mm-pop:10406391
 sanrio:10098613
+rose-cat:10009809
