@@ -105,3 +105,4 @@ sanrio:10098613
 rose-cat:10009809
 united-shop01:10097884
 lovesweet:10095008
+fankle:10004150
