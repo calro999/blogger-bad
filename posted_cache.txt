@@ -104,3 +104,4 @@ mm-pop:10406391
 sanrio:10098613
 rose-cat:10009809
 united-shop01:10097884
+lovesweet:10095008
