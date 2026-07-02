@@ -130,3 +130,4 @@ aoi-depart:10407329
 rose-cat:10009628
 sanrio:10098748
 inasuteppu:10092124
+nijiiromart:10013935
