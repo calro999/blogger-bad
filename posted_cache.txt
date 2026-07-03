@@ -137,3 +137,4 @@ krstlm:10077666
 mm-pop:10310239
 sanrio:10077705
 munyugurumi:10000449
+jone:10000501
