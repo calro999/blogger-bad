@@ -134,3 +134,4 @@ nijiiromart:10013935
 mm-pop:10325294
 capital-kyoto:10005107
 krstlm:10077666
+mm-pop:10310239
