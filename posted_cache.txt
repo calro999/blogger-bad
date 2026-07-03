@@ -132,3 +132,4 @@ sanrio:10098748
 inasuteppu:10092124
 nijiiromart:10013935
 mm-pop:10325294
+capital-kyoto:10005107
