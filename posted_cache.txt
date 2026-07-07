@@ -171,3 +171,4 @@ fidela:10316831
 mm-pop:10321374
 tk-kosme:10003178
 little-lanai:10004820
+sanrio:10083268
