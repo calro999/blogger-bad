@@ -179,3 +179,4 @@ marushin-onlineshop:10013467
 realize-store:10590627
 norenkobo:10006459
 happyfountain:10002984
+cinemacollection:10589080
