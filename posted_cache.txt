@@ -206,3 +206,4 @@ sanrio:10086977
 gapou:10003018
 eyelove:10002456
 velkommen:10456812
+lovesweet:10102007
