@@ -241,3 +241,4 @@ norenkobo:10006855
 fd-shop:10005577
 velkommen:10463126
 velkommen:10456794
+cinemacollection:10505594
