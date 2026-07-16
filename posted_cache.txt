@@ -249,3 +249,4 @@ auc-generalsticker:10014596
 aoi-depart:10373853
 rose-cat:10008869
 cinemacollection:10442500
+charasma:10027274
