@@ -252,3 +252,4 @@ cinemacollection:10442500
 charasma:10027274
 comi-choku:11222858
 aoitrade-1:10002036
+cinemacollection:10474179
