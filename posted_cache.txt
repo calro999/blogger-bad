@@ -264,3 +264,4 @@ capital-kyoto:10005106
 perfectworld-tokyo:10320356
 mediaworldkaitoriworld:10799239
 union-stores:10002872
+alphakids:10373305
