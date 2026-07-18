@@ -271,3 +271,4 @@ norenkobo:10003247
 velkommen:10345773
 irodorikukan:10006995
 yousay-do:10100154
+ellestore:10093862
