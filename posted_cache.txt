@@ -293,3 +293,4 @@ munyugurumi:10000669
 aoi-depart:10289689
 kabanism:10006750
 velkommen:10451344
+sanrio:10100541
