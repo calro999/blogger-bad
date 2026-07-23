@@ -191,6 +191,65 @@ def generate_article_with_llm(item):
 
     raise RuntimeError("All LLM generation attempts failed.")
 
+def proofread_and_optimize_blogger_article(title, html_content):
+    """誤字脱字最終チェックとSEO, AI-SEO, GEO的な修正ブラッシュアップ工程"""
+    if not html_content or len(html_content.strip()) < 50:
+        return html_content
+
+    prompt = f"""以下のブログ記事HTMLに対して、誤字脱字チェックとSEO・AI-SEO・GEO（Generative Engine Optimization）最適化を行い、最高品質の原稿にブラッシュアップしてください。
+
+【タイトル】: {title}
+【HTML本文】:
+{html_content}
+
+【ブラッシュアップ要件】:
+1. 誤字脱字・不自然な日本語表現を完全に校正してください。
+2. AI検索（Perplexity, ChatGPT, Gemini等）が回答の根拠として引用しやすくするため、商品の具体的な魅力・メリット・特徴を構造化してください。
+3. 文章が途中で力尽きず、タグ構造と文脈が完全に完結していることを確認してください。
+4. 前置き・解説なしで修正後のHTML本文のみを出力してください。
+"""
+
+    github_token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    if github_token:
+        try:
+            headers = {"Authorization": f"Bearer {github_token}", "Content-Type": "application/json"}
+            payload = {
+                "model": "gpt-4o-mini",
+                "messages": [
+                    {"role": "system", "content": "あなたはプロのWeb校正者兼SEO/GEOアナリストです。誤字脱字を無くし最高品質のHTML本文のみを出力します。"},
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": 0.5
+            }
+            resp = requests.post("https://models.inference.ai.azure.com/chat/completions", headers=headers, json=payload, timeout=30)
+            if resp.status_code == 200:
+                res_text = resp.json()["choices"][0]["message"]["content"].strip()
+                if "```html" in res_text: res_text = res_text.split("```html", 1)[1].split("```")[0]
+                elif "```" in res_text: res_text = res_text.split("```", 1)[1].split("```")[0]
+                if len(res_text.strip()) > 100:
+                    return res_text.strip()
+        except Exception as e:
+            print(f"Proofread failed: {e}")
+    return html_content
+
+def ensure_complete_blogger_article(html_content):
+    """途中切れ（力尽きる現象）を検知し、安全に文末とHTML閉じタグを補正する"""
+    if not html_content:
+        return html_content
+    html_content = html_content.strip()
+    valid_endings = ("。", "！", "？", "!", "?", "</div>", "</p>", "</ul>", "</li>", "</a>")
+    if not html_content.endswith(valid_endings):
+        print("WARNING: Incomplete article detected. Repairing endings and tags...")
+        last_p = max(html_content.rfind("。"), html_content.rfind("！"), html_content.rfind("</div>"))
+        if last_p > len(html_content) * 0.5:
+            html_content = html_content[:last_p + 1]
+
+    open_divs = html_content.count("<div")
+    close_divs = html_content.count("</div>")
+    if open_divs > close_divs:
+        html_content += "</div>" * (open_divs - close_divs)
+    return html_content
+
 def post_to_blogger(title, content):
     blog_id = os.environ.get("BLOGGER_BLOG_ID")
     if not blog_id:
@@ -556,6 +615,11 @@ def main():
             # AIが失敗した時の絶対的なフォールバックHTML
             image_url = item.get("mediumImageUrls", [{"imageUrl": ""}])[0].get("imageUrl", "") if item.get("mediumImageUrls") else ""
             html_content = f'<h2>{gen_title}</h2><br><br><img src="{image_url}" alt="商品画像" style="max-width: 100%; height: auto;"><br><br><a href="https://room.rakuten.co.jp/jack555/items" target="_blank">✅ 私の楽天ROOMはこちら</a>'
+
+        # 誤字脱字最終チェックとSEO, AI-SEO, GEO的な修正ブラッシュアップ工程
+        html_content = proofread_and_optimize_blogger_article(gen_title, html_content)
+        # 途中切れ（力尽きる現象）防止・補正工程
+        html_content = ensure_complete_blogger_article(html_content)
             
         print("--- Generated HTML Content Snippet ---")
         print(html_content[:200])
