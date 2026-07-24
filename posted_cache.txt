@@ -298,3 +298,4 @@ sanrio:10100541
 lovesweet:10110496
 sadafeel:10006946
 towelshopfriend:10001051
+mercatostore:10002282
