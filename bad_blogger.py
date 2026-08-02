@@ -455,76 +455,161 @@ def post_to_blogger(title, content):
 
 
 def generate_room_comment_with_llm(item):
-    title = item.get("itemName")
-    price = item.get("itemPrice")
+    import urllib.parse
+    import random
+    title = item.get("itemName", "")
+    price = item.get("itemPrice", "")
     
     prompt = f"""以下の楽天の商品情報を基にして、楽天ROOM用の紹介コメント（400文字以内）を生成してください。
 【商品名】: {title}
 【価格】: {price}円
 
 以下の要件を厳格に遵守してください：
-1. 文字数は400文字以内（厳守。超えると投稿エラーになります）。
-2. 親しみやすい話し言葉で、絵文字を5〜8個使用してください。
-3. ハッシュタグを3〜5個（商品のカテゴリや関連するもの）含め、末尾に「#楽天市場」を必ず含めること。
-4. URLや疑似リンク、プレースホルダー（「[リンクはこちら]」など）は絶対に含めないでください。
-5. 出力は紹介コメントのテキストのみとし、前置きやMarkdownの装飾コードブロック等は一切含めないでください。
+1. 口調・トーン：「これ気になってた！」「これかわいい！」「これ便利だよ！」といった親しみやすく共感できる会話調にすること。
+2. 文字数：400文字以内（厳守。超えると投稿エラーになります）。
+3. 絵文字：5〜8個使用して華やかにすること。
+4. ハッシュタグ：3〜5個（商品のカテゴリや関連するもの）含め、末尾に「#楽天市場」を必ず含めること。
+5. URLや疑似リンク、プレースホルダー（「[リンクはこちら]」など）は絶対に含めないでください。
+6. 出力は紹介コメントのテキストのみとし、前置きやMarkdownの装飾コードブロック等は一切含めないでください。
 """
 
-    system_message = "あなたは楽天ROOMでフォロワー急増中のユニークでおもしろいグッズ・変わった便利アイテム専門インフルエンサーです。クスッと笑えるような面白デザインのアイテムや、一風変わった個性的な便利雑貨の魅力を、日本語のみで発信してください。"
+    system_message = (
+        "あなたは楽天ROOMでフォロワー急増中の人気インフルエンサーです。"
+        "「これ気になってた！」「これかわいい！」「これ便利だよ！」などの親しみやすい口調で、"
+        "商品の魅力を共感たっぷりに伝えてください。"
+    )
 
-    # 1. GitHub Models API
-    github_token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
-    if github_token:
-        try:
-            print("Attempting to generate ROOM comment with GitHub Models API...")
-            headers = {
-                "Authorization": f"Bearer {github_token}",
-                "Content-Type": "application/json"
-            }
-            payload = {
-                "model": "gpt-4o-mini",
-                "messages": [
-                    {"role": "system", "content": system_message},
-                    {"role": "user", "content": prompt}
-                ],
-                "temperature": 0.7
-            }
-            response = requests.post("https://models.inference.ai.azure.com/chat/completions", headers=headers, json=payload, timeout=30)
-            if response.status_code == 200:
-                result_text = response.json()["choices"][0]["message"]["content"].strip()
-                if "```" in result_text:
-                    result_text = result_text.replace("```", "")
-                return result_text.strip()
-        except Exception as e:
-            print(f"GitHub Models API ROOM generation failed: {e}")
+    max_attempts = 5
+    for attempt in range(max_attempts):
+        print(f"ROOM comment generation attempt {attempt + 1}/{max_attempts}...")
+        
+        # 1. GitHub Models API
+        github_token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+        if github_token:
+            for model_name in ["gpt-4o-mini", "gpt-4o", "Phi-3.5-mini-instruct", "Meta-Llama-3.1-8B-Instruct"]:
+                try:
+                    headers = {
+                        "Authorization": f"Bearer {github_token}",
+                        "Content-Type": "application/json"
+                    }
+                    payload = {
+                        "model": model_name,
+                        "messages": [
+                            {"role": "system", "content": system_message},
+                            {"role": "user", "content": prompt}
+                        ],
+                        "temperature": 0.7
+                    }
+                    res = requests.post("https://models.inference.ai.azure.com/chat/completions", headers=headers, json=payload, timeout=25)
+                    if res.status_code == 200:
+                        text = res.json()["choices"][0]["message"]["content"].strip()
+                        if "```" in text:
+                            text = text.replace("```", "")
+                        text = text.strip()
+                        if len(text) > 20:
+                            print(f"Successfully generated ROOM comment via GitHub Models API ({model_name}).")
+                            return text
+                except Exception as e:
+                    print(f"GitHub Models API ({model_name}) error: {e}")
 
-    # 2. Pollinations AI
-    pollinations_models = ["openai-fast", "openai"]
-    for model in pollinations_models:
-        try:
-            print(f"Attempting to generate ROOM comment with Pollinations AI (model: {model})...")
-            response = requests.post(
-                "https://text.pollinations.ai/",
-                json={
-                    "messages": [
-                        {"role": "system", "content": system_message},
-                        {"role": "user", "content": prompt}
-                    ],
-                    "model": model
-                },
-                timeout=45
-            )
-            if response.status_code == 200 and len(response.text.strip()) > 30:
-                result_text = response.text.strip()
-                if "```" in result_text:
-                    result_text = result_text.replace("```", "")
-                return result_text.strip()
-        except Exception as e:
-            print(f"Pollinations AI ROOM ({model}) failed: {e}")
+        # 2. Gemini API
+        gemini_key = os.environ.get("GEMINI_API_KEY")
+        if gemini_key:
+            for model_name in ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]:
+                try:
+                    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={gemini_key}"
+                    payload = {
+                        "contents": [
+                            {
+                                "parts": [
+                                    {"text": f"{system_message}\n\n{prompt}"}
+                                ]
+                            }
+                        ]
+                    }
+                    res = requests.post(url, json=payload, timeout=25)
+                    if res.status_code == 200:
+                        data = res.json()
+                        text = data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "").strip()
+                        if "```" in text:
+                            text = text.replace("```", "")
+                        text = text.strip()
+                        if len(text) > 20:
+                            print(f"Successfully generated ROOM comment via Gemini API ({model_name}).")
+                            return text
+                except Exception as e:
+                    print(f"Gemini API ({model_name}) error: {e}")
 
-    # Fallback
-    clean_title = title.replace("【", "").replace("】", "")[:50]
-    return f"【おすすめ厳選アイテム】\n\n本当にセンス抜群でおすすめしたい素敵アイテムをご紹介します✨\nお買い物リストにぴったり🎀\n\n{clean_title}...\n\n#楽天市場 #お買い得 #おすすめ"
+        # 3. Groq API
+        groq_key = os.environ.get("GROQ_API_KEY")
+        if groq_key:
+            for model_name in ["llama-3.3-70b-versatile", "llama3-8b-8192"]:
+                try:
+                    headers = {
+                        "Authorization": f"Bearer {groq_key}",
+                        "Content-Type": "application/json"
+                    }
+                    payload = {
+                        "model": model_name,
+                        "messages": [
+                            {"role": "system", "content": system_message},
+                            {"role": "user", "content": prompt}
+                        ],
+                        "temperature": 0.7
+                    }
+                    res = requests.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=payload, timeout=25)
+                    if res.status_code == 200:
+                        text = res.json()["choices"][0]["message"]["content"].strip()
+                        if "```" in text:
+                            text = text.replace("```", "")
+                        text = text.strip()
+                        if len(text) > 20:
+                            print(f"Successfully generated ROOM comment via Groq API ({model_name}).")
+                            return text
+                except Exception as e:
+                    print(f"Groq API ({model_name}) error: {e}")
+
+        # 4. OpenRouter API
+        openrouter_key = os.environ.get("OPENROUTER_API_KEY")
+        if openrouter_key:
+            for model_name in ["google/gemini-flash-1.5-exp", "meta-llama/llama-3.2-1b-instruct:free"]:
+                try:
+                    headers = {
+                        "Authorization": f"Bearer {openrouter_key}",
+                        "Content-Type": "application/json"
+                    }
+                    payload = {
+                        "model": model_name,
+                        "messages": [
+                            {"role": "system", "content": system_message},
+                            {"role": "user", "content": prompt}
+                        ]
+                    }
+                    res = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload, timeout=25)
+                    if res.status_code == 200:
+                        text = res.json()["choices"][0]["message"]["content"].strip()
+                        if "```" in text:
+                            text = text.replace("```", "")
+                        text = text.strip()
+                        if len(text) > 20:
+                            print(f"Successfully generated ROOM comment via OpenRouter ({model_name}).")
+                            return text
+                except Exception as e:
+                    print(f"OpenRouter ({model_name}) error: {e}")
+
+        time.sleep(1)
+
+    clean_title = title.replace("【", "").replace("】", "")[:40]
+    catchphrases = [
+        "これ気になってた！すごく良さそうで一目惚れしちゃいました✨",
+        "これかわいい！デザインも使いやすさもバッチリだね💕",
+        "これ便利だよ！毎日の生活がもっと楽しくなりそう👍",
+        "これ気になってた！プレゼントにも自分用にも最高だね🎁",
+        "これ便利だよ！持っておくと重宝すること間違いなし✨"
+    ]
+    selected_cp = random.choice(catchphrases)
+    price_str = f"（価格: {price}円）" if price else ""
+    return f"{selected_cp}\n\n『{clean_title}』{price_str}\nチェックしてみてね！✨\n\n#楽天市場 #おすすめアイテム #コレ"
 
 
 def post_to_rakuten_room(item_code, comment):
