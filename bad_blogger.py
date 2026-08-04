@@ -156,6 +156,43 @@ def generate_article_with_llm(item):
 
 
 
+    
+    # 1.2 Groq API (GROQ_API_KEYを使用)
+    groq_key = os.environ.get("GROQ_API_KEY")
+    if groq_key:
+        for groq_model in ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "llama3-8b-8192"]:
+            try:
+                print(f"Attempting to generate article with Groq API ({groq_model})...")
+                headers = {
+                    "Authorization": f"Bearer {groq_key}",
+                    "Content-Type": "application/json"
+                }
+                payload = {
+                    "model": groq_model,
+                    "messages": [
+                        {"role": "system", "content": system_content},
+                        {"role": "user", "content": prompt}
+                    ],
+                    "temperature": 0.7
+                }
+                response = requests.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=payload, timeout=30)
+                if response.status_code == 200:
+                    result_text = response.json()["choices"][0]["message"]["content"].strip()
+                    import json
+                    try:
+                        if "```json" in result_text: result_text = result_text.split("```json", 1)[1]
+                        if "```" in result_text: result_text = result_text.split("```")[0]
+                        result_text = result_text.strip()
+                        parsed = json.loads(result_text)
+                        return parsed
+                    except Exception as e:
+                        print("Groq JSON Parse error:", e)
+                        return {"title": "【注目】" + title[:20] + "...", "html": result_text}
+                else:
+                    print(f"Groq API ({groq_model}) status: {response.status_code}")
+            except Exception as e:
+                print(f"Groq API ({groq_model}) exception: {e}")
+
     print("WARNING: All online LLM generation attempts failed or rate limited. Generating high-quality tailored fallback HTML.")
     fallback_html = f"""<div class="premium-squishy-article">
     <div class="premium-content-body">
@@ -215,6 +252,30 @@ def proofread_and_optimize_blogger_article(title, html_content):
                     return res_text.strip()
         except Exception as e:
             print(f"Proofread failed: {e}")
+    groq_key = os.environ.get("GROQ_API_KEY")
+    if groq_key:
+        try:
+            print("Proofreading with Groq API...")
+            headers = {"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"}
+            payload = {
+                "model": "llama-3.3-70b-versatile",
+                "messages": [
+                    {"role": "system", "content": "あなたはプロのWeb校正者兼SEO/GEOアナリストです。誤字脱字を無くし最高品質のHTML本文のみを出力します。"},
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": 0.5
+            }
+            resp = requests.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=payload, timeout=30)
+            if resp.status_code == 200:
+                res_text = resp.json()["choices"][0]["message"]["content"].strip()
+                if "```html" in res_text: res_text = res_text.split("```html", 1)[1].split("```")[0]
+                elif "```" in res_text: res_text = res_text.split("```", 1)[1].split("```")[0]
+                if len(res_text.strip()) > 100:
+                    print("Successfully proofread with Groq API!")
+                    return res_text.strip()
+        except Exception as e:
+            print(f"Groq proofread failed: {e}")
+
     return html_content
 
 def ensure_complete_blogger_article(html_content):
