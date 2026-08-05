@@ -35,6 +35,7 @@ jobs:
         env:
           RAKUTEN_APP_ID: ${{ secrets.RAKUTEN_APP_ID }}
           RAKUTEN_ACCESS_KEY: ${{ secrets.RAKUTEN_ACCESS_KEY }}
+          RAKUTEN_AFFILIATE_ID: ${{ secrets.RAKUTEN_AFFILIATE_ID }}
           BLOGGER_SESSION_B64: ${{ secrets.BLOGGER_SESSION_B64 }}
           BLOGGER_BLOG_ID: ${{ secrets.BLOGGER_BLOG_ID }}
           ROOM_SESSION_B64: ${{ secrets.ROOM_SESSION_B64 }}
