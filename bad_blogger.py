@@ -73,39 +73,56 @@ def fetch_rakuten_item():
     if not app_id or not access_key:
         raise ValueError("RAKUTEN_APP_ID and RAKUTEN_ACCESS_KEY must be set in environment variables.")
 
-    attributes = ["ばつ丸", "バッドばつ丸", "ブラック", "サンリオ", "限定", "グッズ"]
-    selected_attribute = random.choice(attributes)
-    keyword = f"サンリオ {selected_attribute}"
-    print(f"Searching Rakuten for keyword: {keyword}")
-
-    url = "https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20260401"
-    params = {
-        "applicationId": app_id,
-        "accessKey": access_key,
-        "keyword": keyword,
-        "format": "json",
-        "hits": 30
-    }
-    if affiliate_id:
-        params["affiliateId"] = affiliate_id
-
-    response = requests.get(url, params=params)
-    if response.status_code != 200:
-        raise RuntimeError(f"Failed to fetch from Rakuten API: {response.status_code} - {response.text}")
-
-    data = response.json()
-    items = data.get("Items", [])
-    if not items:
-        raise RuntimeError(f"No items found for keyword: {keyword}")
+    badtz_keywords = [
+        "バッドばつ丸",
+        "バツ丸 グッズ",
+        "バッドばつ丸 ぬいぐるみ",
+        "バツ丸 マスコット",
+        "バッドばつ丸 ポーチ",
+        "バツ丸 キーホルダー",
+        "バッドばつ丸 限定",
+        "バツ丸 サンリオ"
+    ]
+    sanrio_keywords = [
+        "サンリオ 人気グッズ",
+        "サンリオ 限定 キャラクター",
+        "サンリオ マスコット"
+    ]
 
     posted_cache = load_posted_cache()
-    for item_wrapper in items:
-        item = item_wrapper.get("Item", {})
-        item_code = item.get("itemCode")
-        if item_code and item_code not in posted_cache:
-            return item
 
-    raise RuntimeError("All fetched items have already been posted.")
+    for attempt in range(10):
+        if random.random() < 0.85:
+            keyword = random.choice(badtz_keywords)
+        else:
+            keyword = random.choice(sanrio_keywords)
+
+        print(f"Searching Rakuten for keyword (attempt {attempt+1}): {keyword}")
+        url = "https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20260401"
+        params = {
+            "applicationId": app_id,
+            "accessKey": access_key,
+            "keyword": keyword,
+            "format": "json",
+            "hits": 30
+        }
+        if affiliate_id:
+            params["affiliateId"] = affiliate_id
+
+        try:
+            response = requests.get(url, params=params, timeout=15)
+            if response.status_code == 200:
+                data = response.json()
+                items = data.get("Items", [])
+                for item_wrapper in items:
+                    item = item_wrapper.get("Item", {})
+                    item_code = item.get("itemCode")
+                    if item_code and item_code not in posted_cache:
+                        return item
+        except Exception as e:
+            print(f"Error fetching for keyword '{keyword}': {e}")
+
+    raise RuntimeError("Could not find any unposted items after multiple attempts.")
 
 def extract_image_url(item):
     if not item:
@@ -559,24 +576,23 @@ def generate_room_comment_with_llm(item):
     price = item.get("itemPrice") or item.get("price") or ""
     caption = item.get("itemCaption") or item.get("catchcopy") or ""
 
-    prompt = f"""以下の楽天の商品情報を基にして、楽天ROOM用の紹介コメント（400文字以内）を生成してください。
+    prompt = f"""以下のバッドばつ丸・サンリオキャラクター商品情報を基にして、楽天ROOM用の魅力的な紹介コメント（400文字以内）を生成してください。
 【商品名】: {title}
 【価格】: {price}円
 【商品説明・特徴】: {caption[:200]}
 
 以下の要件を厳格に遵守してください：
-1. 口調・トーン：「これ気になってた！」「これかわいい！」「これ便利だよ！」といった親しみやすく共感できる会話調にすること。
+1. 口調・トーン：サンリオ・ばつ丸ファンに刺さる自然な語り口とし、「これかわいい！」「これ気になってた！」「これ便利だよ！」といった安易な定型表現は絶対に使用しないでください。デザインの可愛さ・ブラックユーモア溢れる魅力・実用性等の具体的メリットを解説してください。
 2. 文字数：400文字以内（厳守。超えると投稿エラーになります）。
 3. 絵文字：5〜8個使用して華やかにすること。
-4. ハッシュタグ：3〜5個（商品のカテゴリや関連するもの）含め、末尾に「#楽天市場」を必ず含めること。
+4. ハッシュタグ：3〜5個（「#バッドばつ丸 #ばつ丸 #サンリオ #推し活」等、関連タグ）含め、末尾に「#楽天市場」を必ず含めること。
 5. URLや疑似リンク、プレースホルダー（「[リンクはこちら]」など）は絶対に含めないでください。
 6. 出力は紹介コメントのテキストのみとし、前置きやMarkdownの装飾コードブロック等は一切含めないでください。
 """
 
     system_message = (
-        "あなたは楽天ROOMでフォロワー急増中の人気インフルエンサーです。"
-        "「これ気になってた！」「これかわいい！」「これ便利だよ！」などの親しみやすい口調で、"
-        "商品の魅力を共感たっぷりに伝えてください。"
+        "あなたはバッドばつ丸・サンリオキャラ専門の推し活インフルエンサーです。"
+        "定型フレーズを排し、ファンの心をくすぐる愛のあるオリジナル紹介文を作成してください。"
     )
 
     def clean_text(text):
@@ -686,23 +702,21 @@ def generate_room_comment_with_llm(item):
 
     print("WARNING: All LLM API calls failed. Generating dynamic item-aware comment.")
     clean_title = title.replace("【", "").replace("】", "").replace("！", "").replace("✨", "")[:45]
-    words = [w for w in clean_title.split() if len(w) > 1]
-    keyword = words[0] if words else "おすすめ"
 
     starters = [
-        f"これ気になってた！「{clean_title}」すごく良さそうで目をつけてました✨",
-        f"これかわいい！「{clean_title}」のデザインに一目惚れしちゃった💕",
-        f"これ便利だよ！「{clean_title}」は持っておくと日常で大活躍しそう👍",
-        f"これ気になってた！話題の「{clean_title}」を見つけて即チェック🎁",
-        f"これ便利だよ！生活のクオリティが上がりそうな「{clean_title}」✨"
+        f"ばつ丸推し必見！『{clean_title}』のブラッククールな可愛さが大爆発🖤✨",
+        f"サンリオファン大注目の『{clean_title}』をピックアップ！お部屋に連れて帰りたい可愛さ💕",
+        f"個性的で愛おしい『{clean_title}』のご紹介！自分用や推し活に最高の一品👍",
+        f"見つけた瞬間即チェック！『{clean_title}』の魅力あふれるデザインがたまらない🎁",
+        f"クオリティが高くておすすめの『{clean_title}』！完売前にぜひチェックしてね✨"
     ]
     starter = random.choice(starters)
 
     bodies = [
-        "実用性抜群で見た目のセンスも最高のアイテム！自分用はもちろんギフトにもぴったりだね😊",
-        "使ってみた人の評価も高くて期待大！毎日の生活がもっと楽しくなりそう✨",
-        "細部までこだわりを感じる優秀アイテム。気になる人はぜひチェックしてみてね🛍️",
-        "このクオリティでこの価格は本当に魅力的！見つけたら早めのチェックがおすすめ👍"
+        "ばつ丸ならではのいたずらっぽい表情とクールな雰囲気が最高のアイテム！コレクションに加えたくなります😊",
+        "実用性もバッチリで毎日連れて歩きたくなるクオリティ。ファンなら絶対手に入れたい逸品✨",
+        "プレゼントや自分へのご褒美にも大人気！存在感抜群でテンション上がります🛍️",
+        "お気に入りのサンリオグッズと一緒に飾っても映える優秀アイテム。お早めにどうぞ👍"
     ]
     body = random.choice(bodies)
 
