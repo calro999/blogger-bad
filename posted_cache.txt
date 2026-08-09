@@ -344,3 +344,4 @@ yoikutsu:10039113
 stylife:15619122
 s4gshop:10027228
 aoi-depart:10216425
+mikawa-cotton:10002641
