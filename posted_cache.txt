@@ -348,3 +348,4 @@ mikawa-cotton:10002641
 aoi-depart:10182967
 bungunomori:10043999
 event-ya:10010374
+ginnokura:10058446
