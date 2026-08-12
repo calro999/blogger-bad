@@ -395,3 +395,4 @@ akgshop:10031052
 kyouwa-print:10004041
 capital-kyoto:10005393
 shizuya:10000374
+realize-store:10520897
