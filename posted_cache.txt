@@ -393,3 +393,4 @@ aoi-depart:10133214
 akgshop:10034323
 akgshop:10031052
 kyouwa-print:10004041
+capital-kyoto:10005393
