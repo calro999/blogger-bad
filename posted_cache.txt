@@ -409,3 +409,4 @@ finepharmacy:10100302
 annindo:10053450
 kawashimass:10003366
 sanrio:10094598
+auc-generalsticker:10016257
