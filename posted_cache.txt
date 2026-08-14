@@ -424,3 +424,4 @@ shizuya:10000372
 shoplistselect:10064103
 miraclim:10003189
 sanrio:10091852
+kougalog:11261807
