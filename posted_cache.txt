@@ -434,3 +434,4 @@ capital-kyoto:10003143
 laughlaugh:10487807
 sweetlife-shop:10000026
 shizuya:10000961
+sanrio:10083888
