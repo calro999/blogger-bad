@@ -436,3 +436,4 @@ sweetlife-shop:10000026
 shizuya:10000961
 sanrio:10083888
 sanrio:10087110
+rose-cat:10010789
