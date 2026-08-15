@@ -438,3 +438,4 @@ sanrio:10083888
 sanrio:10087110
 rose-cat:10010789
 shizuya:10001695
+wao-shop:10232171
