@@ -454,3 +454,4 @@ w-col:10080238
 nijiiromart:10012949
 raptors-katsuyama:10000603
 shizuya:10001502
+breezeshop:10052899
