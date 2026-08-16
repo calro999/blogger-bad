@@ -471,3 +471,4 @@ r-kojima:11615618
 honeys-online:10038776
 magnetpark:10002176
 sanrio:10091576
+magnetpark:10002188
