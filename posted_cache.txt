@@ -458,3 +458,4 @@ breezeshop:10052899
 w-col:10026104
 nijiiromart:10012187
 cdare:10003569
+akgshop:10035398
