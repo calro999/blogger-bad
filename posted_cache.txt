@@ -523,3 +523,4 @@ juden-king:10018331
 auc-treasuremarket:10037131
 auc-treasuremarket:10037123
 wao-shop:10232471
+nijiiromart:10011993
