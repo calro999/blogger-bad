@@ -198,14 +198,28 @@ def generate_article_with_llm(item):
     # 1. Gemini API（最優先）
     gemini_key = os.environ.get("GEMINI_API_KEY")
     if gemini_key:
-        for model_name in ["gemini-2.0-flash", "gemini-2.5-flash", "gemini-1.5-flash"]:
+        models = [
+            "gemini-2.5-flash",
+            "gemini-2.0-flash",
+            "gemini-2.5-flash-lite",
+            "gemini-2.0-flash-lite",
+            "gemini-3.7-flash",
+            "gemini-3.6-flash",
+            "gemini-3.5-flash",
+            "gemini-3.5-flash-lite",
+            "gemini-3.1-flash-lite",
+            "gemini-3-flash",
+            "gemini-2.5-pro",
+            "gemini-3.1-pro"
+        ]
+        for model_name in models:
             try:
                 api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={gemini_key}"
                 payload = {
                     "contents": [{"parts": [{"text": f"{system_message}\n\n{prompt}"}]}],
                     "generationConfig": {"temperature": 0.8, "maxOutputTokens": 2048}
                 }
-                if "2.5" in model_name:
+                if any(v in model_name for v in ["2.5", "3.", "3-"]):
                     payload["generationConfig"]["thinkingConfig"] = {"thinkingBudget": 0}
                 res = requests.post(api_url, json=payload, timeout=30)
                 if res.status_code == 200:
@@ -601,14 +615,28 @@ def generate_room_comment_with_llm(item):
     # 1. Gemini API（最優先。thinking無効化・全parts結合で安定化）
     gemini_key = os.environ.get("GEMINI_API_KEY")
     if gemini_key:
-        for model_name in ["gemini-2.0-flash", "gemini-2.5-flash", "gemini-1.5-flash"]:
+        models = [
+            "gemini-2.5-flash",
+            "gemini-2.0-flash",
+            "gemini-2.5-flash-lite",
+            "gemini-2.0-flash-lite",
+            "gemini-3.7-flash",
+            "gemini-3.6-flash",
+            "gemini-3.5-flash",
+            "gemini-3.5-flash-lite",
+            "gemini-3.1-flash-lite",
+            "gemini-3-flash",
+            "gemini-2.5-pro",
+            "gemini-3.1-pro"
+        ]
+        for model_name in models:
             try:
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={gemini_key}"
                 payload = {
                     "contents": [{"parts": [{"text": f"{system_message}\n\n{prompt}"}]}],
                     "generationConfig": {"temperature": 0.9, "maxOutputTokens": 600}
                 }
-                if "2.5" in model_name:
+                if any(v in model_name for v in ["2.5", "3.", "3-"]):
                     payload["generationConfig"]["thinkingConfig"] = {"thinkingBudget": 0}
                 res = requests.post(url, json=payload, timeout=30)
                 if res.status_code == 200:
