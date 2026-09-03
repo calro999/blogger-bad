@@ -640,3 +640,4 @@ apronmarket:10006856
 ezaki-g:10319553
 apronmarket:10006857
 ezaki-g:10319547
+minnano-store:10000260
