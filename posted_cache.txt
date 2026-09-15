@@ -696,3 +696,4 @@ aoi-depart:10434000
 aoi-depart:10438351
 teeolive:10027869
 aoi-depart:10430393
+bungunomori:10049286
