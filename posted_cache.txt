@@ -717,3 +717,4 @@ sanrio:10077721
 riverall:10291783
 tomimori2:10001360
 sanrio:10087644
+wao-shop:10232646
