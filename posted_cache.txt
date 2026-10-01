@@ -737,3 +737,4 @@ stylife:15780854
 crafting-kit:10003492
 ohmae-xmas:10005662
 cherico:10025091
+kobecraft-bekkan:10003497
