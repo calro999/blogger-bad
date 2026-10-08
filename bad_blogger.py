@@ -73,29 +73,35 @@ def fetch_rakuten_item():
     if not app_id or not access_key:
         raise ValueError("RAKUTEN_APP_ID and RAKUTEN_ACCESS_KEY must be set in environment variables.")
 
-    badtz_keywords = [
-        "バッドばつ丸",
-        "バツ丸 グッズ",
-        "バッドばつ丸 ぬいぐるみ",
-        "バツ丸 マスコット",
-        "バッドばつ丸 ポーチ",
-        "バツ丸 キーホルダー",
-        "バッドばつ丸 限定",
-        "バツ丸 サンリオ"
+    # サンリオ主要キャラクターリスト
+    sanrio_characters = [
+        "バッドばつ丸", "クロミ", "ハローキティ", "マイメロディ", 
+        "シナモロール", "ポムポムプリン", "ポチャッコ", "ハンギョドン", 
+        "タキシードサム", "けろけろけろっぴ", "あひるのペックル", "こぎみゅん", 
+        "ウィッシュミーメル", "リトルツインスターズ", "サンリオ"
     ]
-    sanrio_keywords = [
-        "サンリオ 人気グッズ",
-        "サンリオ 限定 キャラクター",
-        "サンリオ マスコット"
+
+    # 優先順位（ガチャ ＞ 小物 ＞ おもちゃ ＞ 雑貨・文具・バッグ等）
+    priority_categories = [
+        ["ガチャ", "ガチャガチャ", "カプセルトイ"],
+        ["マスコット", "キーホルダー", "ポーチ", "小物入れ", "パスケース"],
+        ["おもちゃ", "フィギュア", "ぬいぐるみ", "トランプ", "アクスタ"],
+        ["文房具", "シール", "ステッカー", "トートバッグ", "限定 グッズ"]
     ]
 
     posted_cache = load_posted_cache()
 
-    for attempt in range(10):
-        if random.random() < 0.85:
-            keyword = random.choice(badtz_keywords)
-        else:
-            keyword = random.choice(sanrio_keywords)
+    # 最大25回の試行で幅広くヒットさせる
+    for attempt in range(25):
+        char = random.choice(sanrio_characters)
+        # ガチャ優先、次に小物、おもちゃ
+        cat_group = random.choices(
+            priority_categories, 
+            weights=[0.40, 0.30, 0.20, 0.10], 
+            k=1
+        )[0]
+        cat = random.choice(cat_group)
+        keyword = f"{char} {cat}"
 
         print(f"Searching Rakuten for keyword (attempt {attempt+1}): {keyword}")
         url = "https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20260401"
@@ -749,7 +755,7 @@ def generate_room_comment_with_llm(item):
     body = random.choice(bodies)
 
     price_info = f"（価格: {price}円）" if price else ""
-    return f"{starter}\n\n{body}\n{price_info}\n\n#{keyword} #楽天市場 #おすすめアイテム #コレ"
+    return f"{starter}\n\n{body}\n{price_info}\n\n#サンリオ #楽天市場 #おすすめアイテム #コレ"
 
 
 
