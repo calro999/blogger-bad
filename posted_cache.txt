@@ -769,3 +769,4 @@ iloiloislandimport:10268362
 bjdesigns:10001244
 ssstore:10000159
 lovesweet:10076906
+sanrio:10077706
