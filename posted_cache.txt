@@ -781,3 +781,4 @@ capital-kyoto:10005500
 sanrio:10095513
 sanrio:10077700
 o-kawaya:10108033
+auc-yuyou:10156104
