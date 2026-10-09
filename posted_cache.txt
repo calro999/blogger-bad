@@ -790,3 +790,4 @@ cinemacollection:10519595
 felishshop:10000263
 saitamatoy:10021599
 cinemacollection:10214477
+ssstore:10000291
