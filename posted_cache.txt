@@ -779,3 +779,4 @@ mm-pop:10393924
 npcd:10000442
 capital-kyoto:10005500
 sanrio:10095513
+sanrio:10077700
