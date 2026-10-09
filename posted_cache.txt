@@ -813,3 +813,4 @@ auc-toysanta:10388228
 hands-net:12194966
 connectgate:10017854
 npcd:10001094
+kobe-sanobun:10000908
