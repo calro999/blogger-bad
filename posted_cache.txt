@@ -786,3 +786,4 @@ smltrading:10000649
 picoanna:10002118
 sanrio:10097924
 tvoos:10053461
+cinemacollection:10519595
