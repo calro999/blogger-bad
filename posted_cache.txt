@@ -808,3 +808,4 @@ festival-plaza:10065830
 tuhan-ya-2:10006452
 capital-kyoto:10005105
 tvoos:10047347
+zsizo:10002715
