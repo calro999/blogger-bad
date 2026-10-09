@@ -806,3 +806,4 @@ auc-hanabiya-gekiyasu:10006356
 jugem2020:10003393
 festival-plaza:10065830
 tuhan-ya-2:10006452
+capital-kyoto:10005105
