@@ -828,3 +828,4 @@ auc-isauto:10006779
 smartzakka:10036639
 rinzo:10017580
 saitamatoy:10023156
+connectgate:10017361
