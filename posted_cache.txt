@@ -831,3 +831,4 @@ saitamatoy:10023156
 connectgate:10017361
 ssstore:10000273
 rapites:10024376
+sanrio:10074241
