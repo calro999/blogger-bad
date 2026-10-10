@@ -834,3 +834,4 @@ rapites:10024376
 sanrio:10074241
 lovesweet:10108398
 cinemacollection:10479350
+mama-store:10007632
