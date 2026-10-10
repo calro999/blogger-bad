@@ -878,3 +878,4 @@ walletstore:10008865
 auc-toysanta:10328993
 pocchi-shop:10048887
 saitamatoy:10022530
+edion:10918570
