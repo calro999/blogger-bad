@@ -908,3 +908,4 @@ npcd:10001468
 monomode:10197806
 allblue88:10000416
 auc-ookawaya:10102198
+smltrading:10000568
