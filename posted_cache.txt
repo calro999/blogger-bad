@@ -919,3 +919,4 @@ aoi-depart:10440238
 sanrio:10096214
 casmin:10083574
 akgshop:10029113
+auc-yuyou:10208715
