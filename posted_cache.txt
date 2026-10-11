@@ -903,3 +903,4 @@ book:21884039
 cyalelyahata:10001500
 sanrio:10095405
 shopjapan:10005847
+hanko-otobe:10001156
