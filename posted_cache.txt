@@ -915,3 +915,4 @@ cinemacollection:10455756
 monomode:10197277
 capital-kyoto:10005150
 auc-yuyou:10203096
+aoi-depart:10440238
