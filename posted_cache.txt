@@ -945,3 +945,4 @@ usagi-online:10067815
 cinemacollection:10518212
 auc-treasuremarket:10047014
 auc-yuyou:10207318
+casmin:10080279
