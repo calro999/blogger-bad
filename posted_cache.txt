@@ -1002,3 +1002,4 @@ bungunomori:10045993
 bungunomori:10038847
 aoi-depart:10362956
 shugale:10114360
+capital-kyoto:10005556
