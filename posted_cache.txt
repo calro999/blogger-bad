@@ -1087,3 +1087,4 @@ osaifuyasan:10002655
 auc-generalsticker:10011245
 auc-yuyou:10181914
 smltrading:10000675
+kanfudo:10000250
