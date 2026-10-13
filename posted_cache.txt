@@ -1091,3 +1091,4 @@ kanfudo:10000250
 auc-treasuremarket:10046045
 hanamaru-shouten:10025714
 sanrio:10083263
+ssstore:10000205
