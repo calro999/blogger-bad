@@ -1089,3 +1089,4 @@ auc-yuyou:10181914
 smltrading:10000675
 kanfudo:10000250
 auc-treasuremarket:10046045
+hanamaru-shouten:10025714
