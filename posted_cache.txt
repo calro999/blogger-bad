@@ -1085,3 +1085,4 @@ ssstore:10000206
 digitalringo:10006383
 osaifuyasan:10002655
 auc-generalsticker:10011245
+auc-yuyou:10181914
