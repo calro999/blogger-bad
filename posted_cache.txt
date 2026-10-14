@@ -1140,3 +1140,4 @@ auc-yuyou:10219882
 anitto-friends:10176816
 cinemacollection:10597130
 capital-kyoto:10002526
+auc-yuyou:10189851
