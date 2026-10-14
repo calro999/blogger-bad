@@ -1135,3 +1135,4 @@ garakutafactory:10000840
 auc-ookawaya:10088105
 best-plice:10182963
 sanrio:10093649
+mama-store:10007984
