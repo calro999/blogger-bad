@@ -1092,3 +1092,4 @@ auc-treasuremarket:10046045
 hanamaru-shouten:10025714
 sanrio:10083263
 ssstore:10000205
+sayacollection:10020394
