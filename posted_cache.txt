@@ -1112,3 +1112,4 @@ r-kojima:11648284
 bunbougu-shibuya:10123894
 anicharaya:10257057
 kanedestore:10020320
+realize-store:10630633
