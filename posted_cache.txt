@@ -1142,3 +1142,4 @@ cinemacollection:10597130
 capital-kyoto:10002526
 auc-yuyou:10189851
 livingut:10243263
+shopfuu:10003070
