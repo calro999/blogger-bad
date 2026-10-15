@@ -1174,3 +1174,4 @@ biteki-life:10600911
 stylife:15742455
 rinsmile-:10002071
 realize-store:10526061
+cinemacollection:10422819
