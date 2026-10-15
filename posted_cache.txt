@@ -1201,3 +1201,4 @@ exmail:10000817
 sanrio:10083247
 asahimi:10001554
 annindo:10052117
+felishshop:10000552
