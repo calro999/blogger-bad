@@ -1199,3 +1199,4 @@ auc-yuyou:10144993
 penport:10070648
 exmail:10000817
 sanrio:10083247
+asahimi:10001554
