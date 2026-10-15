@@ -1184,3 +1184,4 @@ rinzo:10044340
 rinzo:10060431
 bungunomori:10045999
 toraya-fabric:10002459
+0101marui:12943568
