@@ -1212,3 +1212,4 @@ al-tas:10020754
 sanrio:10080690
 hobisuto:10011679
 digitalringo:10006234
+auc-isauto:10007221
