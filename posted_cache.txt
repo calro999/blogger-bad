@@ -1254,3 +1254,4 @@ velkommen:10377768
 auc-treasuremarket:10051678
 o-kawaya:10104287
 goodsstreet:10064695
+ssstore:10000297
