@@ -1263,3 +1263,4 @@ aoi-depart:10388610
 gacha-samurai:10013332
 devin:10017267
 auc-generalsticker:10007134
+starvations:10048320
