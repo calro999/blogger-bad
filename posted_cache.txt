@@ -1262,3 +1262,4 @@ jugem2020:10003698
 aoi-depart:10388610
 gacha-samurai:10013332
 devin:10017267
+auc-generalsticker:10007134
