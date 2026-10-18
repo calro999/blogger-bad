@@ -1298,3 +1298,4 @@ stylife:15806278
 hobisuto:10025624
 digitalringo:10006424
 union-stores:10007478
+cinemacollection:10466419
