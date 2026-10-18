@@ -1256,3 +1256,4 @@ o-kawaya:10104287
 goodsstreet:10064695
 ssstore:10000297
 stylife:15862262
+cinemacollection:10537981
