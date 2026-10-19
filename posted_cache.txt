@@ -1361,3 +1361,4 @@ yoimonoplaza:10000170
 auc-toysanta:10372578
 shop-lady:10002261
 lovesweet:10098007
+auc-isauto:10007013
