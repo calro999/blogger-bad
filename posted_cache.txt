@@ -1326,3 +1326,4 @@ amiami:12848495
 backyard:10348492
 kanfudo:10000251
 kanfudo:10000380
+auc-generalsticker:10011635
