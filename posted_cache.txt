@@ -1360,3 +1360,4 @@ pochi-ciao:10018901
 yoimonoplaza:10000170
 auc-toysanta:10372578
 shop-lady:10002261
+lovesweet:10098007
