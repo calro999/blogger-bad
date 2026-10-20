@@ -1409,3 +1409,4 @@ gacha-samurai:10014834
 cinemacollection:10505672
 realize-store:10302183
 futon:10040356
+sanrio:10095381
