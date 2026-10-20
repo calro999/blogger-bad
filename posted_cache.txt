@@ -1392,3 +1392,4 @@ gozigen-shop:10013732
 saino:10100185
 smltrading:10001026
 smartzakka:10036646
+sanrio:10093593
