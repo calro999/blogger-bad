@@ -1461,3 +1461,4 @@ stylife:15766739
 auc-yuyou:10208658
 skgroup:10007872
 sanrio:10083267
+capital-kyoto:10005253
