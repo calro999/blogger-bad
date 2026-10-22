@@ -1505,3 +1505,4 @@ auc-generalsticker:10010201
 munyugurumi:10000114
 aoi-depart:10231364
 knick-knack-ann:10332409
+mercatostore:10002617
