@@ -1527,3 +1527,4 @@ smltrading:10001063
 laughlaugh:10433368
 amiami:12820065
 felishshop:10000026
+auc-daiseiin:10000180
