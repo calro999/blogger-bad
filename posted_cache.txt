@@ -1502,3 +1502,4 @@ sanrio:10085802
 interior-palette:10150801
 penshiru:10217314
 auc-generalsticker:10010201
+munyugurumi:10000114
