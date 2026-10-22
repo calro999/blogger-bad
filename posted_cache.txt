@@ -1516,3 +1516,4 @@ biccamera:15254122
 fullout:10059383
 sanrio:10083243
 diablock:10002339
+auc-yuyou:10144592
