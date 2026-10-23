@@ -1538,3 +1538,4 @@ nijiiromart:10011248
 capital-kyoto:10004341
 auc-yuyou:10198124
 jugem2020:10003699
+cinemacollection:10422367
