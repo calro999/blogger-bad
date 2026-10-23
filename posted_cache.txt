@@ -1549,3 +1549,4 @@ velkommen:10432041
 auc-yuyou:10208981
 pippi-store:10822011
 nijiiromart:10014126
+ssstore:10000222
