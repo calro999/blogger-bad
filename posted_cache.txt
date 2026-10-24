@@ -1610,3 +1610,4 @@ tetelab:10003245
 cinemacollection:10442438
 auc-yuyou:10200667
 sanrio:10087660
+auc-isauto:10006432
