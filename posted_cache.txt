@@ -1614,3 +1614,4 @@ auc-isauto:10006432
 elimino:10218015
 onemarket:10000434
 biccamera:15297999
+kanfudo:10000263
