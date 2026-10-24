@@ -1606,3 +1606,4 @@ lovesweet:10086614
 kcplace:10000998
 capital-kyoto:10001115
 ssstore:10000306
+tetelab:10003245
