@@ -1604,3 +1604,4 @@ auc-toysanta:10325218
 realize-store:10526043
 lovesweet:10086614
 kcplace:10000998
+capital-kyoto:10001115
