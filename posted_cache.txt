@@ -1694,3 +1694,4 @@ connectgate:10017463
 aoi-depart:10380620
 toyjack:10017539
 happyfountain:10003152
+sanrio:10095396
