@@ -1648,3 +1648,4 @@ cinemacollection:10484169
 cinemacollection:10500401
 techin01:10002880
 auc-daiseiin:10000766
+adokikaku:10015523
