@@ -1706,3 +1706,4 @@ perfectworld-tokyo:10298678
 felishshop:10000578
 auc-yuyou:10215292
 goodsstreet:10077424
+amiami:12848615
