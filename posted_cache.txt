@@ -1734,3 +1734,4 @@ auc-yuyou:10213152
 auc-treasuremarket:10054207
 sanrio:10083246
 capital-kyoto:10005151
+acqua-calda:10008130
