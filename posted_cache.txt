@@ -1739,3 +1739,4 @@ npcd:10001469
 sanrio:10082733
 auc-toysanta:10393941
 r-kojima:11648280
+auc-yuyou:10146911
