@@ -1788,3 +1788,4 @@ auc-yuyou:10220207
 stylifemen:11232556
 aoi-depart:10321152
 realize-store-2:10146222
+motte-ecobag:10007124
