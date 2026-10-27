@@ -1754,3 +1754,4 @@ cinemacollection:10504609
 kanfudo:10000387
 cysweet:10000030
 auc-yuyou:10215388
+stylife:15300144
