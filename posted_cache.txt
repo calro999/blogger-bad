@@ -1845,3 +1845,4 @@ smltrading:10001314
 hanamaru-shouten:10021940
 crossroad:10088427
 realize-store:10526059
+realize-store:10450070
