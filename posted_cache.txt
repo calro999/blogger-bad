@@ -1873,3 +1873,4 @@ krstlm:10076284
 laughlaugh:10493566
 miraclim:10003196
 sanrio:10086966
+munyugurumi:10000110
