@@ -1844,3 +1844,4 @@ m-gaming:10001542
 smltrading:10001314
 hanamaru-shouten:10021940
 crossroad:10088427
+realize-store:10526059
