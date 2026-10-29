@@ -1895,3 +1895,4 @@ kidsroom:10089241
 ssstore:10000326
 capital-kyoto:10004333
 rinsmile-:10000843
+lovesweet:10106837
