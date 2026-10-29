@@ -1853,3 +1853,4 @@ gr-online:10049349
 collecolle-teddy:10015988
 auc-fukumishouji:10028816
 ai-kikaku:10006347
+capital-kyoto:10005439
