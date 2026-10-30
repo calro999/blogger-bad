@@ -1910,3 +1910,4 @@ aoi-depart:10465324
 krstlm:10121114
 rennkou-syouji:10021057
 kyouwa-print:10004392
+hanamaru-shouten:10021943
