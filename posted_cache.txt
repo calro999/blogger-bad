@@ -1912,3 +1912,4 @@ rennkou-syouji:10021057
 kyouwa-print:10004392
 hanamaru-shouten:10021943
 nijiiromart:10006367
+aoi-depart:10448816
