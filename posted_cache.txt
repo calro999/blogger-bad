@@ -1986,3 +1986,4 @@ mm-pop:10351219
 auc-toysanta:10391632
 auc-yuyou:10201235
 belldine:10001195
+capital-kyoto:10005109
