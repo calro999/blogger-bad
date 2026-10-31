@@ -1995,3 +1995,4 @@ auc-toysanta:10349470
 rose-cat:10009371
 yoimonoplaza:10000286
 s4gshop:10027146
+smartzakka:10035700
