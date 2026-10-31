@@ -2000,3 +2000,4 @@ smartzakka:10035700
 velkommen:10465294
 hauhau:10032178
 mercatostore:10002618
+kukuna-online:10000479
