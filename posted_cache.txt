@@ -2093,3 +2093,4 @@ luceku:10036020
 karafura-shop:10000465
 sanrio:10093629
 auc-toysanta:10393318
+capital-kyoto:10002520
