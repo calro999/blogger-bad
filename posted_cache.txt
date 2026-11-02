@@ -2088,3 +2088,4 @@ world-free-store:10022961
 velkommen:10398293
 kabanism:10005923
 aoi-depart:10200060
+ssstore:10000092
