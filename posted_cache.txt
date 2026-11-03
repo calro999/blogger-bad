@@ -2167,3 +2167,4 @@ perfectworld-tokyo:10316801
 sanrio:10101639
 realize-store:10519648
 spjstore:10000718
+smltrading:10000875
