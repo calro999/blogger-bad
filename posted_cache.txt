@@ -2184,3 +2184,4 @@ auc-treasuremarket:10054025
 sanrio:10094723
 noris-collection:10004995
 gazaihonpo:10407145
+kanfudo:10000163
