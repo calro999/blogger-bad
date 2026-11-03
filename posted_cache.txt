@@ -2164,3 +2164,4 @@ auc-toysanta:10303196
 hands-net:12192661
 rinzo:10021634
 perfectworld-tokyo:10316801
+sanrio:10101639
