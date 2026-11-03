@@ -2132,3 +2132,4 @@ ohmae-xmas:10005256
 mm-pop:10378415
 spjstore:10000387
 sazac-store:10000490
+amiami:12848610
