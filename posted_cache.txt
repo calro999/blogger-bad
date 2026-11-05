@@ -2241,3 +2241,4 @@ nijiiromart:10013958
 festival-plaza:10062283
 biccamera:15209394
 festival-plus:10067847
+sanrio:10085825
