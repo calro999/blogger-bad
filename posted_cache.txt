@@ -2261,3 +2261,4 @@ cinemacollection:10533383
 digitalringo:10006434
 felishshop:10000570
 hanamaru-shouten:10035987
+sanrio:10083165
