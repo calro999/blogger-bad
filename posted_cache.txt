@@ -2248,3 +2248,4 @@ cinemacollection:10595257
 auc-fukumishouji:10028813
 aromacoffee:10058442
 realize-store:10692253
+ssstore:10000293
