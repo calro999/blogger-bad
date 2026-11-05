@@ -2258,3 +2258,4 @@ kanfudo:10000334
 mixhana:10009203
 sanrio:10097894
 cinemacollection:10533383
+digitalringo:10006434
