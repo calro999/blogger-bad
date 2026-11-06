@@ -2303,3 +2303,4 @@ krstlm:10121100
 kurashikenkou:10242707
 cinemacollection:10442754
 kidsroom:10089325
+osaifuyasan:10004471
