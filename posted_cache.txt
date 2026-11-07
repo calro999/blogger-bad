@@ -2378,3 +2378,4 @@ auc-treasuremarket:10053929
 hanamaru-shouten:10009892
 juden-king:10013397
 sanrio:10097927
+stylife:15766091
