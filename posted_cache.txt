@@ -2471,3 +2471,4 @@ bungunomori:10038660
 aoi-depart:10440236
 sfpesca:10015479
 soleil-shop:10001349
+shop-kobaru:10000569
