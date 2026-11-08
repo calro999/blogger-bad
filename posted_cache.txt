@@ -2434,3 +2434,4 @@ aoi-depart:10451482
 capital-kyoto:10002119
 cinemacollection:10518380
 2ndls:10003619
+lovesweet:10122476
