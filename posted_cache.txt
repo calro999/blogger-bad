@@ -2464,3 +2464,4 @@ cinemacollection:10495362
 kanfudo:10000359
 biccamera:15665484
 stylife:15735386
+auc-yuyou:10197584
