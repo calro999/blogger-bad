@@ -2431,3 +2431,4 @@ annindo:10052991
 diomart:10254770
 project1-6:10004037
 aoi-depart:10451482
+capital-kyoto:10002119
