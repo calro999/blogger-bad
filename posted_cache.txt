@@ -2472,3 +2472,4 @@ aoi-depart:10440236
 sfpesca:10015479
 soleil-shop:10001349
 shop-kobaru:10000569
+mr-ba-gk-angelmoms:10000148
