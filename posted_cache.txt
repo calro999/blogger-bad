@@ -2440,3 +2440,4 @@ bag-marche:10000351
 bleubleuet:10002165
 auc-greenps:10003535
 cinemacollection:10481826
+capital-kyoto:10005741
