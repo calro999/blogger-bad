@@ -2573,3 +2573,4 @@ munyugurumi:10000215
 shinobiya:10049934
 auc-generalsticker:10011228
 holly0211:10001550
+auc-bstarb:10005390
