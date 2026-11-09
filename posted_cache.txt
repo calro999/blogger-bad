@@ -2524,3 +2524,4 @@ hobbyzakka-cha3:10002660
 0101marui:13279016
 aoi-depart:10369563
 sanrio:10093949
+kawashimass:10003510
