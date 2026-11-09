@@ -2516,3 +2516,4 @@ shoplistselect:10603545
 bunbougu-shibuya:10108905
 mm-pop:10311966
 npcd:10001084
+kukuna-online:10000477
