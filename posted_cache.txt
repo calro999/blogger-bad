@@ -2571,3 +2571,4 @@ mobile-land:10064195
 book:21974178
 munyugurumi:10000215
 shinobiya:10049934
+auc-generalsticker:10011228
