@@ -2531,3 +2531,4 @@ cinemacollection:10393067
 bakaure-onlineshop:10001158
 manianomori:10000669
 anicharaya:10153179
+realize-store-2:10466986
