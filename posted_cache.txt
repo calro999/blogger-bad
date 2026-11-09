@@ -2502,3 +2502,4 @@ velkommen:10468410
 lovesweet:10121057
 sanrio:10100005
 kanfudo:10000273
+chara-basket:10003881
