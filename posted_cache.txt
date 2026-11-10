@@ -2576,3 +2576,4 @@ holly0211:10001550
 auc-bstarb:10005390
 o-kawaya:10108034
 bungunomori:10036140
+auc-generalsticker:10017000
