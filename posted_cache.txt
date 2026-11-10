@@ -2636,3 +2636,4 @@ happy-space:10008228
 auc-daiseiin:10000182
 sanrio:10101657
 noahs-ark:10086848
+lovesweet:10080902
