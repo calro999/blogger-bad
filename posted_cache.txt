@@ -2659,3 +2659,4 @@ aoi-depart:10246313
 usplaza:10020598
 morro:10023945
 anitto-friends:10177901
+edenki:22745104
