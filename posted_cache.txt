@@ -2579,3 +2579,4 @@ bungunomori:10036140
 auc-generalsticker:10017000
 morro:10025919
 store-marufuku:10029354
+auc-generalsticker:10017381
