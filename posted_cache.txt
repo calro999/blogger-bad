@@ -2650,3 +2650,4 @@ sakuranbo-heiwa:10002782
 livingut:10241876
 bungunomori:10047309
 laughlaugh:10496938
+awamori-zizake:10026461
