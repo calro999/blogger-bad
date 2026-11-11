@@ -2735,3 +2735,4 @@ norenkobo:10004998
 rapites:10027006
 bungunomori:10051605
 bunguo-no-osk:10018035
+kanfudo:10000159
