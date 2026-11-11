@@ -2715,3 +2715,4 @@ genkioukoku:10002581
 stella-shop2032:10000007
 locondo:13716043
 goodsstreet:10107107
+enlilsss:10070184
