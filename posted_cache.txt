@@ -2713,3 +2713,4 @@ cinemacollection:10532458
 usagi-online:10072084
 genkioukoku:10002581
 stella-shop2032:10000007
+locondo:13716043
