@@ -2680,3 +2680,4 @@ stylife:15915838
 olivit:10002297
 d-fit:10007262
 sanrio:10084211
+anitto-friends:10177908
