@@ -2802,3 +2802,4 @@ aoi-depart:10284262
 sumaholand:10002272
 d-fit:10009832
 lovesweet:10075896
+luck-luck-shop:10242735
