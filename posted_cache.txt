@@ -2939,3 +2939,4 @@ aoi-depart:10246315
 stylife:15918537
 giftjapan:10008869
 stylife:15616462
+rinzo:10038726
