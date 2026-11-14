@@ -3008,3 +3008,4 @@ kingman:10012415
 cinemacollection:10514962
 stylife:15915829
 aikawa:10001918
+fukutokustore:10000081
