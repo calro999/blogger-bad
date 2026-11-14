@@ -3044,3 +3044,4 @@ aoi-depart:10316751
 aoi-depart:10284135
 stylife:15918776
 utu-wa:10009694
+auc-generalsticker:10016712
