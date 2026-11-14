@@ -3033,3 +3033,4 @@ chara-basket:10005187
 gourmandise:10010128
 ballballoon:10000886
 happy-space:10008200
+decora01:10001194
