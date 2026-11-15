@@ -3140,3 +3140,4 @@ shoplistselect:10580878
 hauhau:10028643
 yoikutsu:10040005
 e-bronze:10001356
+laughlaugh:10528004
