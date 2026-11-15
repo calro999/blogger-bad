@@ -3139,3 +3139,4 @@ komorebishop:10300419
 shoplistselect:10580878
 hauhau:10028643
 yoikutsu:10040005
+e-bronze:10001356
