@@ -3193,3 +3193,4 @@ morro:10002019
 holoholo:10011882
 shop-kobaru:10000557
 sanrio:10082160
+casmin:10072711
