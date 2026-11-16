@@ -3232,3 +3232,4 @@ fofo-cafe:10006417
 seafield:10006230
 omutsufactory:10005288
 chara-basket:10004738
+kenko-k:10031644
