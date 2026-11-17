@@ -3296,3 +3296,4 @@ sakai-fukui:10028151
 fullout:10055163
 lokahi-oki:10001046
 omutsufactory:10005766
+hobisuto:10011678
