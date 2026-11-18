@@ -3382,3 +3382,4 @@ shop-kobaru:10000567
 veriteonline:10001101
 shoplistselect:10577879
 seafield:10008816
+auc-yanchars:10013202
