@@ -3436,3 +3436,4 @@ yacom-tokyo:10027721
 la-graine:12236421
 e-monohasin:10002599
 superfoot:10003716
+stella-shop2032:10000077
