@@ -3387,3 +3387,4 @@ mitoman-goodworks:10005864
 aoi-depart:10151884
 aoi-depart:10284252
 union-stores:10007524
+yasuragimok:10012943
