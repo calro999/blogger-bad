@@ -3378,3 +3378,4 @@ yacom-tokyo:10030182
 casmin:10072890
 sanrio:10095398
 velkommen:10403410
+shop-kobaru:10000567
