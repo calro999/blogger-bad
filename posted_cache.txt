@@ -3405,3 +3405,4 @@ stylife:15616435
 shop-kobaru:10000573
 sanrio:10085047
 rshop-hobbys:10004195
+akgshop:10033936
