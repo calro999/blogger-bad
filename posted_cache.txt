@@ -3402,3 +3402,4 @@ mamamedic:10049876
 bloom-shinkan:10011786
 characterland:10000761
 stylife:15616435
+shop-kobaru:10000573
