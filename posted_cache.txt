@@ -3439,3 +3439,4 @@ superfoot:10003716
 stella-shop2032:10000077
 kawashimass:10003566
 cinemacollection:10301426
+auc-generalsticker:10014593
