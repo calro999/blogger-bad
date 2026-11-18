@@ -3426,3 +3426,4 @@ auc-generalsticker:10014978
 chara-basket:10004982
 babumontage:10008484
 yamakawa-slipper:10000067
+yamakawa-slipper:10000150
