@@ -3585,3 +3585,4 @@ makemerry:10008275
 seafield:10002208
 sime-fabric:10007994
 ginnokura:10058445
+sanrio:10098662
