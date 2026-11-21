@@ -3646,3 +3646,4 @@ smartzakka:10035423
 apron-gift:10000436
 stylife:15484001
 shop-kobaru:10000572
+velkommen:10455246
