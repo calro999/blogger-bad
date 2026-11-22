@@ -3682,3 +3682,4 @@ toulife:10003406
 stylife:13824849
 shoplistselect:10093138
 laughlaugh:10514730
+seikatsuzakkamemo:10032398
