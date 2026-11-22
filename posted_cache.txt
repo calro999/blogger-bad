@@ -3670,3 +3670,4 @@ shugale:10114959
 import-ss-shop:10046784
 auc-yanchars:10013225
 sanrio:10094475
+pippi-store:11121488
