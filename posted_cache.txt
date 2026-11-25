@@ -3739,3 +3739,4 @@ bontan108:10083431
 petitpoche:10006442
 velkommen:10428738
 asahiboueki:10000367
+capital-kyoto:10000501
