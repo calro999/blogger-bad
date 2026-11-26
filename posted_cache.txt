@@ -3786,3 +3786,4 @@ stylife:15339178
 dietshop:10438654
 aoi-depart:10418991
 stylife:15203316
+morimotosangyo:10000821
